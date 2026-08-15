@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- ============================================================
+     META — 아래 내용을 본인 정보로 교체하세요
+     ============================================================ -->
+<title>Your Name</title>
+<meta name="author" content="Your Name" />
+<meta name="description" content="Ph.D. Student in Computer Science — researching intelligent and reliable AI systems" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    /* ---- 블루 팔레트 ---- */
+    --ink:        #0B1B3B;   /* 딥 네이비 (제목) */
+    --body:       #33415C;   /* 본문 */
+    --muted:      #6B7A99;   /* 보조 텍스트 */
+    --accent:     #2C55E0;   /* 로열 블루 (링크/액센트) */
+    --accent-deep:#16308C;   /* 호버/강조 */
+    --bg:         #FBFCFE;   /* 배경 */
+    --bg-alt:     #EEF3FC;   /* 섹션 대체 배경 */
+    --line:       #DCE5F4;   /* 헤어라인 */
+    --card:       #FFFFFF;
+
+    --serif: "Newsreader", Georgia, serif;
+    --sans:  "Inter", system-ui, -apple-system, sans-serif;
+    --mono:  "IBM Plex Mono", ui-monospace, monospace;
+
+    --maxw: 760px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--body);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color .18s ease, border-color .18s ease;
+  }
+  a:hover { color: var(--accent-deep); border-bottom-color: var(--accent-deep); }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* ================= NAV ================= */
+  .nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(251,252,254,.82);
+    backdrop-filter: saturate(160%) blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: var(--maxw); margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand {
+    font-family: var(--serif); font-weight: 600; font-size: 1.05rem;
+    color: var(--ink); border: 0; letter-spacing: .1px;
+  }
+  .brand:hover { color: var(--accent-deep); border: 0; }
+  .nav-links { display: flex; gap: 22px; }
+  .nav-links a {
+    font-family: var(--mono); font-size: .82rem; color: var(--muted);
+    border: 0; text-transform: lowercase;
+  }
+  .nav-links a:hover { color: var(--accent); border: 0; }
+
+  /* ================= HERO ================= */
+  .hero { padding: 64px 0 12px; }
+  .hero-grid {
+    display: grid; grid-template-columns: 132px 1fr; gap: 32px; align-items: center;
+  }
+  .avatar {
+    width: 132px; height: 132px; border-radius: 14px; object-fit: cover;
+    border: 1px solid var(--line);
+    box-shadow: 0 10px 30px -14px rgba(11,27,59,.35);
+    background: linear-gradient(150deg, #dbe6ff, #b9ccff);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-size: 2.6rem; color: var(--accent-deep);
+  }
+  h1.name {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(2.1rem, 5vw, 2.7rem); line-height: 1.08;
+    color: var(--ink); margin: 0 0 8px;
+    letter-spacing: -.5px;
+  }
+  .role { font-size: 1rem; color: var(--body); margin: 0; }
+  .affil { font-size: 1rem; color: var(--muted); margin: 2px 0 0; }
+
+  .socials { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .socials a {
+    font-family: var(--mono); font-size: .78rem; color: var(--body);
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 4px 12px; background: var(--card);
+  }
+  .socials a:hover {
+    color: var(--accent-deep); border-color: var(--accent);
+    background: var(--bg-alt); border-bottom-color: var(--accent);
+  }
+
+  /* ================= SECTION ================= */
+  section { padding: 40px 0; }
+  .eyebrow {
+    font-family: var(--mono); font-size: .74rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--accent);
+    display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+  }
+  .eyebrow::before {
+    content: ""; width: 22px; height: 2px; background: var(--accent); border-radius: 2px;
+  }
+  h2 {
+    font-family: var(--serif); font-weight: 600; color: var(--ink);
+    font-size: 1.5rem; margin: 0 0 18px; letter-spacing: -.2px;
+  }
+  p { margin: 0 0 16px; }
+  .contact-code {
+    font-family: var(--mono); font-size: .86rem; color: var(--ink);
+    background: var(--bg-alt); padding: 2px 7px; border-radius: 6px;
+  }
+
+  .interests { margin: 8px 0 0; padding: 0; list-style: none; }
+  .interests > li { margin-bottom: 14px; }
+  .interests strong { color: var(--ink); font-weight: 600; }
+  .interests ul { margin: 6px 0 0; padding-left: 18px; }
+  .interests ul li { margin: 2px 0; color: var(--body); }
+  .interests ul li::marker { color: var(--accent); }
+
+  /* ================= NEWS (timeline) ================= */
+  .news { border-left: 2px solid var(--line); margin-left: 6px; padding-left: 26px; }
+  .news-item { position: relative; padding-bottom: 22px; }
+  .news-item:last-child { padding-bottom: 0; }
+  .news-item::before {
+    content: ""; position: absolute; left: -33px; top: 8px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 0 4px var(--bg);
+  }
+  .news-date {
+    font-family: var(--mono); font-size: .76rem; color: var(--muted);
+    letter-spacing: .04em; margin-bottom: 2px;
+  }
+
+  /* ================= PUBLICATIONS ================= */
+  .pub-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+  .pub-head a { font-family: var(--mono); font-size: .8rem; }
+  .pub {
+    border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+    padding: 20px 22px; margin-bottom: 16px;
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .pub:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px -18px rgba(11,27,59,.4);
+    border-color: #c6d6f4;
+  }
+  .pub-badge {
+    font-family: var(--mono); font-size: .68rem; color: var(--accent-deep);
+    background: var(--bg-alt); border: 1px solid var(--line);
+    padding: 1px 8px; border-radius: 999px; display: inline-block; margin-bottom: 8px;
+  }
+  .pub-title {
+    font-family: var(--serif); font-weight: 600; font-size: 1.14rem;
+    color: var(--ink); line-height: 1.3; margin: 0 0 6px;
+  }
+  .pub-authors { font-size: .92rem; color: var(--body); margin: 0 0 3px; }
+  .pub-authors .me { color: var(--ink); font-weight: 600; }
+  .pub-venue {
+    font-family: var(--mono); font-size: .78rem; color: var(--muted);
+    font-style: normal; margin: 0 0 8px;
+  }
+  .pub-desc { font-size: .92rem; color: var(--body); margin: 0 0 12px; }
+  .pub-links { display: flex; gap: 8px; }
+  .pub-links a {
+    font-family: var(--mono); font-size: .74rem; color: var(--accent);
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px;
+  }
+  .pub-links a:hover {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ================= FOOTER ================= */
+  footer {
+    border-top: 1px solid var(--line); margin-top: 24px;
+    padding: 28px 0 48px; color: var(--muted);
+    font-family: var(--mono); font-size: .76rem;
+  }
+  footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* ================= ANIMATION ================= */
+  .fade { opacity: 0; transform: translateY(10px); animation: rise .7s ease forwards; }
+  .fade:nth-child(2) { animation-delay: .06s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  /* ================= RESPONSIVE ================= */
+  @media (max-width: 560px) {
+    .hero { padding-top: 44px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 20px; text-align: left; }
+    .avatar { width: 108px; height: 108px; font-size: 2.1rem; }
+    .nav-links { gap: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .fade { animation: none; opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand">Your Name</a>
+    <div class="nav-links">
+      <a href="#about">about</a>
+      <a href="#news">news</a>
+      <a href="#publications">publications</a>
+    </div>
+  </div>
+</nav>
+
+<div id="top"></div>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="wrap hero-grid fade">
+    <!-- 사진: 아래 div를 <img class="avatar" src="bio.jpg" alt="Your Name"> 로 교체하세요 -->
+    <div class="avatar" aria-label="프로필 사진">YN</div>
+    <div>
+      <h1 class="name">Your Name</h1>
+      <p class="role">Ph.D. Student in Computer Science</p>
+      <p class="affil">University Name</p>
+      <div class="socials">
+        <a href="https://x.com/yourhandle" target="_blank" rel="noopener">Twitter</a>
+        <a href="https://scholar.google.com/" target="_blank" rel="noopener">Scholar</a>
+        <a href="https://github.com/yourhandle" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/yourhandle" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:you@example.com">Email</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= ABOUT ================= -->
+<section id="about">
+  <div class="wrap fade">
+    <div class="eyebrow">About</div>
+    <h2>안녕하세요 👋</h2>
+    <p>
+      저는 <strong style="color:var(--ink)">University Name</strong>의 컴퓨터과학 박사과정 학생이며,
+      <a href="#">Advisor A</a> 교수님과 <a href="#">Advisor B</a> 교수님의 지도를 받고 있습니다.
+    </p>
+    <p>
+      제 연구는 인간 사회에 도움이 되는 지능적이고 신뢰할 수 있는 AI 시스템을 만드는 데
+      초점을 두고 있습니다. 특히 다음 주제들에 관심이 있습니다:
+    </p>
+    <ul class="interests">
+      <li>
+        <strong>Reasoning</strong>
+        <ul>
+          <li>파운데이션 모델의 추론 능력 이해 및 향상</li>
+          <li>효과적인 검증(verification) 시스템 개발</li>
+          <li>분포 외(OOD) 태스크로 일반화되는 AI 시스템</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Reliability</strong>
+        <ul>
+          <li>파운데이션 모델과 AI 시스템에 대한 이해 심화</li>
+          <li>제어 가능성 및 강건성(robustness) 향상</li>
+          <li>확장 가능한 신뢰성 기법 설계</li>
+        </ul>
+      </li>
+    </ul>
+    <p style="margin-top:16px">
+      연구에 대한 자세한 내용은 <a href="#">Google Scholar</a>,
+      <a href="#">Semantic Scholar</a>, <a href="#">DBLP</a>에서 확인하실 수 있습니다.
+      연락은 <span class="contact-code">you [at] example [dot] com</span> 으로 부탁드립니다.
+    </p>
+  </div>
+</section>
+
+<!-- ================= NEWS ================= -->
+<section id="news" style="background:var(--bg-alt); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="wrap fade">
+    <div class="eyebrow">News</div>
+    <h2>최근 소식</h2>
+    <div class="news">
+      <div class="news-item">
+        <div class="news-date">2025 · 09</div>
+        <div>논문 <a href="#"><em>Paper Title Here</em></a>가 NeurIPS 2025 (oral)에 채택되었습니다.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-date">2025 · 05</div>
+        <div><strong style="color:var(--ink)">Company / Lab</strong>에 Student Researcher로 합류하게 되었습니다.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-date">2025 · 04</div>
+        <div><strong style="color:var(--ink)">University Name</strong>에서 박사과정을 시작합니다!</div>
+      </div>
+      <div class="news-item">
+        <div class="news-date">2025 · 01</div>
+        <div>논문 <a href="#"><em>Another Paper</em></a>가 ICLR 2025에 채택되었습니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PUBLICATIONS ================= -->
+<section id="publications">
+  <div class="wrap fade">
+    <div class="eyebrow">Selected Publications</div>
+    <div class="pub-head">
+      <h2 style="margin:0">주요 논문</h2>
+      <a href="#">View All →</a>
+    </div>
+    <div style="height:18px"></div>
+
+    <!-- ↓ 논문 카드 하나 복사해서 개수를 늘리세요 -->
+    <article class="pub">
+      <span class="pub-badge">🏆 Oral Presentation</span>
+      <h3 class="pub-title">Paper Title Goes Here: A Descriptive Subtitle</h3>
+      <p class="pub-authors"><span class="me">Your Name</span>, Coauthor A, Coauthor B, Coauthor C</p>
+      <p class="pub-venue">Advances in Neural Information Processing Systems (NeurIPS) 2025</p>
+      <p class="pub-desc">한 줄 요약: 이 논문에서 무엇을 했고 어떤 결과를 얻었는지 간단히 설명합니다.</p>
+      <div class="pub-links">
+        <a href="#" target="_blank" rel="noopener">arXiv</a>
+        <a href="#" target="_blank" rel="noopener">PDF</a>
+        <a href="#" target="_blank" rel="noopener">Code</a>
+      </div>
+    </article>
+
+    <article class="pub">
+      <h3 class="pub-title">Second Paper Title Here</h3>
+      <p class="pub-authors">Coauthor A, <span class="me">Your Name</span>, Coauthor B</p>
+      <p class="pub-venue">International Conference on Machine Learning (ICML) 2025</p>
+      <p class="pub-desc">이 연구의 핵심 기여를 한 문장으로 요약해 적어 주세요.</p>
+      <div class="pub-links">
+        <a href="#" target="_blank" rel="noopener">arXiv</a>
+        <a href="#" target="_blank" rel="noopener">PDF</a>
+      </div>
+    </article>
+
+    <article class="pub">
+      <h3 class="pub-title">Third Paper Title Here</h3>
+      <p class="pub-authors"><span class="me">Your Name</span>, Coauthor A, Coauthor B, Coauthor C, Coauthor D</p>
+      <p class="pub-venue">International Conference on Learning Representations (ICLR) 2025</p>
+      <p class="pub-desc">간단한 한 줄 설명을 여기에 작성합니다.</p>
+      <div class="pub-links">
+        <a href="#" target="_blank" rel="noopener">arXiv</a>
+        <a href="#" target="_blank" rel="noopener">PDF</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <span>Last updated: 2026</span>
+    <span>© Your Name</span>
+  </div>
+</footer>
+
+</body>
+</html>
