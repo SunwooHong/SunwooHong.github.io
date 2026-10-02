@@ -1,15 +1,12 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<!-- ============================================================
-     META — 아래 내용을 본인 정보로 교체하세요
-     ============================================================ -->
-<title>Your Name</title>
-<meta name="author" content="Your Name" />
-<meta name="description" content="Ph.D. Student in Computer Science — researching intelligent and reliable AI systems" />
+<title>Sunwoo Hong</title>
+<meta name="author" content="Sunwoo Hong" />
+<meta name="description" content="Sunwoo Hong — M.S. student at KAIST AI working on discrete diffusion models, reasoning, and world models for embodied agents." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -72,15 +69,23 @@
   }
   .brand {
     font-family: var(--serif); font-weight: 600; font-size: 1.05rem;
-    color: var(--ink); border: 0; letter-spacing: .1px;
+    color: var(--ink); border: 0; letter-spacing: .1px; white-space: nowrap;
   }
   .brand:hover { color: var(--accent-deep); border: 0; }
-  .nav-links { display: flex; gap: 22px; }
+  .nav-links { display: flex; align-items: center; gap: 22px; }
   .nav-links a {
     font-family: var(--mono); font-size: .82rem; color: var(--muted);
     border: 0; text-transform: lowercase;
   }
   .nav-links a:hover { color: var(--accent); border: 0; }
+  /* CV: 메뉴 안에서 눈에 띄도록 버튼 형태로 */
+  .nav-links a.nav-cv {
+    color: var(--accent); text-transform: none;
+    border: 1px solid var(--accent); border-radius: 999px; padding: 2px 12px;
+  }
+  .nav-links a.nav-cv:hover {
+    background: var(--accent); color: #fff; border: 1px solid var(--accent);
+  }
 
   /* ================= HERO ================= */
   .hero { padding: 64px 0 12px; }
@@ -130,14 +135,21 @@
     font-size: 1.5rem; margin: 0 0 18px; letter-spacing: -.2px;
   }
   p { margin: 0 0 16px; }
+  strong { color: var(--ink); font-weight: 600; }
   .contact-code {
     font-family: var(--mono); font-size: .86rem; color: var(--ink);
     background: var(--bg-alt); padding: 2px 7px; border-radius: 6px;
   }
 
+  /* 박사 지원 안내 */
+  .note {
+    border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    background: var(--bg-alt); border-radius: 8px;
+    padding: 12px 16px; margin: 0 0 20px; color: var(--ink);
+  }
+
   .interests { margin: 8px 0 0; padding: 0; list-style: none; }
   .interests > li { margin-bottom: 14px; }
-  .interests strong { color: var(--ink); font-weight: 600; }
   .interests ul { margin: 6px 0 0; padding-left: 18px; }
   .interests ul li { margin: 2px 0; color: var(--body); }
   .interests ul li::marker { color: var(--accent); }
@@ -149,7 +161,7 @@
   .news-item::before {
     content: ""; position: absolute; left: -33px; top: 8px;
     width: 9px; height: 9px; border-radius: 50%;
-    background: var(--accent); box-shadow: 0 0 0 4px var(--bg);
+    background: var(--accent); box-shadow: 0 0 0 4px var(--bg-alt);
   }
   .news-date {
     font-family: var(--mono); font-size: .76rem; color: var(--muted);
@@ -158,7 +170,8 @@
 
   /* ================= PUBLICATIONS ================= */
   .pub-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
-  .pub-head a { font-family: var(--mono); font-size: .8rem; }
+  .pub-head a { font-family: var(--mono); font-size: .8rem; white-space: nowrap; }
+  .pub-legend { font-size: .82rem; color: var(--muted); margin: 6px 0 18px; }
   .pub {
     border: 1px solid var(--line); border-radius: 12px; background: var(--card);
     padding: 20px 22px; margin-bottom: 16px;
@@ -174,6 +187,8 @@
     background: var(--bg-alt); border: 1px solid var(--line);
     padding: 1px 8px; border-radius: 999px; display: inline-block; margin-bottom: 8px;
   }
+  /* Oral / Spotlight 강조 (CV의 강조색과 같은 계열) */
+  .pub-badge.award { color: #A51E1E; background: #FCEEEE; border-color: #F1CFCF; }
   .pub-title {
     font-family: var(--serif); font-weight: 600; font-size: 1.14rem;
     color: var(--ink); line-height: 1.3; margin: 0 0 6px;
@@ -185,7 +200,8 @@
     font-style: normal; margin: 0 0 8px;
   }
   .pub-desc { font-size: .92rem; color: var(--body); margin: 0 0 12px; }
-  .pub-links { display: flex; gap: 8px; }
+  .pub-desc:last-child { margin-bottom: 0; }
+  .pub-links { display: flex; flex-wrap: wrap; gap: 8px; }
   .pub-links a {
     font-family: var(--mono); font-size: .74rem; color: var(--accent);
     border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px;
@@ -215,7 +231,14 @@
     .hero { padding-top: 44px; }
     .hero-grid { grid-template-columns: 1fr; gap: 20px; text-align: left; }
     .avatar { width: 108px; height: 108px; font-size: 2.1rem; }
-    .nav-links { gap: 16px; }
+    .nav-inner { padding: 12px 16px; gap: 10px; }
+    .nav-links { gap: 12px; }
+    .nav-links a { font-size: .76rem; }
+    .nav-links a.nav-cv { padding: 2px 9px; }
+  }
+  @media (max-width: 400px) {
+    .brand { display: none; }                 /* 좁은 화면에서는 메뉴만 표시 */
+    .nav-inner { justify-content: center; }
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -228,11 +251,13 @@
 <!-- ================= NAV ================= -->
 <nav class="nav">
   <div class="nav-inner">
-    <a href="#top" class="brand">Your Name</a>
+    <a href="#top" class="brand">Sunwoo Hong</a>
     <div class="nav-links">
       <a href="#about">about</a>
       <a href="#news">news</a>
       <a href="#publications">publications</a>
+      <!-- CV: 컴파일한 PDF를 이 파일과 같은 폴더에 SunwooHong_CV.pdf 로 올리세요 -->
+      <a href="SunwooHong_CV.pdf" class="nav-cv" target="_blank" rel="noopener">CV</a>
     </div>
   </div>
 </nav>
@@ -242,18 +267,18 @@
 <!-- ================= HERO ================= -->
 <header class="hero">
   <div class="wrap hero-grid fade">
-    <!-- 사진: 아래 div를 <img class="avatar" src="bio.jpg" alt="Your Name"> 로 교체하세요 -->
-    <div class="avatar" aria-label="프로필 사진">YN</div>
+    <!-- 사진: 아래 div를 <img class="avatar" src="bio.jpg" alt="Sunwoo Hong"> 로 교체하세요 -->
+    <div class="avatar" role="img" aria-label="Sunwoo Hong">SH</div>
     <div>
-      <h1 class="name">Your Name</h1>
-      <p class="role">Ph.D. Student in Computer Science</p>
-      <p class="affil">University Name</p>
+      <h1 class="name">Sunwoo Hong</h1>
+      <p class="role">M.S. Student in Artificial Intelligence</p>
+      <p class="affil">Kim Jaechul Graduate School of AI, KAIST</p>
       <div class="socials">
-        <a href="https://x.com/yourhandle" target="_blank" rel="noopener">Twitter</a>
-        <a href="https://scholar.google.com/" target="_blank" rel="noopener">Scholar</a>
-        <a href="https://github.com/yourhandle" target="_blank" rel="noopener">GitHub</a>
-        <a href="https://www.linkedin.com/in/yourhandle" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="mailto:you@example.com">Email</a>
+        <a href="SunwooHong_CV.pdf" target="_blank" rel="noopener">CV</a>
+        <a href="https://scholar.google.com/citations?user=4PHESKoAAAAJ" target="_blank" rel="noopener">Scholar</a>
+        <a href="https://github.com/SunwooHong" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/sunwoo-hong/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="mailto:sunwoo@kaist.ac.kr">Email</a>
       </div>
     </div>
   </div>
@@ -263,37 +288,47 @@
 <section id="about">
   <div class="wrap fade">
     <div class="eyebrow">About</div>
-    <h2>안녕하세요 👋</h2>
+    <h2>Hi, I'm Sunwoo.</h2>
+
+    <!-- 지원 시즌이 끝나면 아래 한 줄을 지우세요 -->
+    <p class="note">I am applying to Ph.D. programs for Fall 2027.</p>
+
     <p>
-      저는 <strong style="color:var(--ink)">University Name</strong>의 컴퓨터과학 박사과정 학생이며,
-      <a href="#">Advisor A</a> 교수님과 <a href="#">Advisor B</a> 교수님의 지도를 받고 있습니다.
+      I am an M.S. student at <strong>KAIST AI</strong>, advised by
+      <a href="https://fbsqkd.github.io/" target="_blank" rel="noopener">Prof. Se-Young Yun</a>.
+      In 2026 I was a visiting researcher at the <strong>University of Toronto</strong> and the
+      <strong>Vector Institute</strong>, hosted by
+      <a href="https://www.cs.toronto.edu/~rahulgk/" target="_blank" rel="noopener">Prof. Rahul G. Krishnan</a>.
+      I received my B.S. in Electrical and Computer Engineering from Seoul National University.
     </p>
     <p>
-      제 연구는 인간 사회에 도움이 되는 지능적이고 신뢰할 수 있는 AI 시스템을 만드는 데
-      초점을 두고 있습니다. 특히 다음 주제들에 관심이 있습니다:
+      I look for the assumption that bottlenecks a class of generative models and replace it with a
+      better-matched signal or objective. So far I have done this for masked diffusion language
+      models. I am now bringing the same approach to world models and physical reasoning for
+      embodied agents.
     </p>
     <ul class="interests">
       <li>
-        <strong>Reasoning</strong>
+        <strong>World models and physical reasoning</strong>
         <ul>
-          <li>파운데이션 모델의 추론 능력 이해 및 향상</li>
-          <li>효과적인 검증(verification) 시스템 개발</li>
-          <li>분포 외(OOD) 태스크로 일반화되는 AI 시스템</li>
+          <li>World models that predict at physical events instead of at fixed time steps</li>
+          <li>Visual and compositional reasoning that current architectures still find hard</li>
+          <li>Connecting generative models to planning and action for embodied agents</li>
         </ul>
       </li>
       <li>
-        <strong>Reliability</strong>
+        <strong>Discrete diffusion and reasoning</strong>
         <ul>
-          <li>파운데이션 모델과 AI 시스템에 대한 이해 심화</li>
-          <li>제어 가능성 및 강건성(robustness) 향상</li>
-          <li>확장 가능한 신뢰성 기법 설계</li>
+          <li>Inference: which signal tells a model that a token is safe to commit</li>
+          <li>Learning: which few tokens a model should be trained on</li>
+          <li>Evaluation: whether a correct answer survives an equivalent rewrite of the problem</li>
         </ul>
       </li>
     </ul>
     <p style="margin-top:16px">
-      연구에 대한 자세한 내용은 <a href="#">Google Scholar</a>,
-      <a href="#">Semantic Scholar</a>, <a href="#">DBLP</a>에서 확인하실 수 있습니다.
-      연락은 <span class="contact-code">you [at] example [dot] com</span> 으로 부탁드립니다.
+      My papers are listed on
+      <a href="https://scholar.google.com/citations?user=4PHESKoAAAAJ" target="_blank" rel="noopener">Google Scholar</a>.
+      You can reach me at <span class="contact-code">sunwoo [at] kaist [dot] ac [dot] kr</span>.
     </p>
   </div>
 </section>
@@ -302,23 +337,28 @@
 <section id="news" style="background:var(--bg-alt); border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
   <div class="wrap fade">
     <div class="eyebrow">News</div>
-    <h2>최근 소식</h2>
+    <h2>Recent news</h2>
     <div class="news">
+      <!-- 월을 모르는 항목은 연도만 적었습니다. "2026 · 08" 형식으로 채워 주세요 -->
+      <div class="news-item">
+        <div class="news-date">2026</div>
+        <div><a href="pivot-sd/"><em>Pivot-SD</em></a> was accepted to the EMNLP 2026 main conference as an <strong>oral presentation</strong>.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-date">2026 · 07</div>
+        <div>Presented <a href="https://openreview.net/forum?id=BC3jb6452Y" target="_blank" rel="noopener"><em>Logical Equivariance in Diffusion Language Models</em></a> at the ICML 2026 Workshop on Foundations of Deep Generative Models.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-date">2026</div>
+        <div><a href="https://ckck12.github.io/Route-Guied-CBF-QP/" target="_blank" rel="noopener"><em>Route-Guided CBF-QP Repair</em></a>, our work on safe vision-language-action models, appeared at the RSS 2026 Workshop on Trustworthy Embodied Foundation Models.</div>
+      </div>
+      <div class="news-item">
+        <div class="news-date">2026 · 01</div>
+        <div>Started as a visiting researcher at the <strong>University of Toronto</strong> and the <strong>Vector Institute</strong>, hosted by Prof. Rahul G. Krishnan.</div>
+      </div>
       <div class="news-item">
         <div class="news-date">2025 · 09</div>
-        <div>논문 <a href="#"><em>Paper Title Here</em></a>가 NeurIPS 2025 (oral)에 채택되었습니다.</div>
-      </div>
-      <div class="news-item">
-        <div class="news-date">2025 · 05</div>
-        <div><strong style="color:var(--ink)">Company / Lab</strong>에 Student Researcher로 합류하게 되었습니다.</div>
-      </div>
-      <div class="news-item">
-        <div class="news-date">2025 · 04</div>
-        <div><strong style="color:var(--ink)">University Name</strong>에서 박사과정을 시작합니다!</div>
-      </div>
-      <div class="news-item">
-        <div class="news-date">2025 · 01</div>
-        <div>논문 <a href="#"><em>Another Paper</em></a>가 ICLR 2025에 채택되었습니다.</div>
+        <div><a href="https://arxiv.org/abs/2511.05664" target="_blank" rel="noopener"><em>KLASS</em></a> was accepted to NeurIPS 2025 as a <strong>Spotlight</strong>.</div>
       </div>
     </div>
   </div>
@@ -327,47 +367,68 @@
 <!-- ================= PUBLICATIONS ================= -->
 <section id="publications">
   <div class="wrap fade">
-    <div class="eyebrow">Selected Publications</div>
+    <div class="eyebrow">Publications</div>
     <div class="pub-head">
-      <h2 style="margin:0">주요 논문</h2>
-      <a href="#">View All →</a>
+      <h2 style="margin:0">Selected papers</h2>
+      <a href="https://scholar.google.com/citations?user=4PHESKoAAAAJ" target="_blank" rel="noopener">View all →</a>
     </div>
-    <div style="height:18px"></div>
+    <p class="pub-legend">* equal contribution</p>
 
     <!-- ↓ 논문 카드 하나 복사해서 개수를 늘리세요 -->
     <article class="pub">
-      <span class="pub-badge">🏆 Oral Presentation</span>
-      <h3 class="pub-title">Paper Title Goes Here: A Descriptive Subtitle</h3>
-      <p class="pub-authors"><span class="me">Your Name</span>, Coauthor A, Coauthor B, Coauthor C</p>
-      <p class="pub-venue">Advances in Neural Information Processing Systems (NeurIPS) 2025</p>
-      <p class="pub-desc">한 줄 요약: 이 논문에서 무엇을 했고 어떤 결과를 얻었는지 간단히 설명합니다.</p>
+      <span class="pub-badge award">Oral Presentation</span>
+      <h3 class="pub-title">Pivot-SD: Efficient Self-Distillation for Masked Diffusion Language Models</h3>
+      <p class="pub-authors">Seo Hyun Kim*, <span class="me">Sunwoo Hong*</span>, Younwoo Choi, Chen-Hao Chao, Se-Young Yun, Rahul G. Krishnan</p>
+      <p class="pub-venue">EMNLP 2026 · Main Conference</p>
+      <p class="pub-desc">A masked diffusion language model can be post-trained on under 4% of its tokens. Supervising only the few commitments that most reduce uncertainty beats full-sequence fine-tuning and online RL at a fraction of the compute.</p>
       <div class="pub-links">
-        <a href="#" target="_blank" rel="noopener">arXiv</a>
-        <a href="#" target="_blank" rel="noopener">PDF</a>
-        <a href="#" target="_blank" rel="noopener">Code</a>
+        <a href="pivot-sd/">Project</a>
       </div>
     </article>
 
     <article class="pub">
-      <h3 class="pub-title">Second Paper Title Here</h3>
-      <p class="pub-authors">Coauthor A, <span class="me">Your Name</span>, Coauthor B</p>
-      <p class="pub-venue">International Conference on Machine Learning (ICML) 2025</p>
-      <p class="pub-desc">이 연구의 핵심 기여를 한 문장으로 요약해 적어 주세요.</p>
+      <span class="pub-badge award">Spotlight · top 3.2%</span>
+      <h3 class="pub-title">KLASS: KL-Guided Fast Inference in Masked Diffusion Models</h3>
+      <p class="pub-authors">Seo Hyun Kim*, <span class="me">Sunwoo Hong*</span>, Hojung Jung, Youngrok Park, Se-Young Yun</p>
+      <p class="pub-venue">NeurIPS 2025</p>
+      <p class="pub-desc">A training-free sampler that uses the KL divergence between denoising steps to find tokens that are safe to unmask in parallel. Up to 2.78× faster generation while improving over greedy decoding, across text, image, and molecular generation.</p>
       <div class="pub-links">
-        <a href="#" target="_blank" rel="noopener">arXiv</a>
-        <a href="#" target="_blank" rel="noopener">PDF</a>
+        <a href="https://arxiv.org/abs/2511.05664" target="_blank" rel="noopener">arXiv</a>
+        <a href="https://github.com/shkim0116/KLASS" target="_blank" rel="noopener">Code</a>
       </div>
     </article>
 
     <article class="pub">
-      <h3 class="pub-title">Third Paper Title Here</h3>
-      <p class="pub-authors"><span class="me">Your Name</span>, Coauthor A, Coauthor B, Coauthor C, Coauthor D</p>
-      <p class="pub-venue">International Conference on Learning Representations (ICLR) 2025</p>
-      <p class="pub-desc">간단한 한 줄 설명을 여기에 작성합니다.</p>
+      <span class="pub-badge">Under review</span>
+      <h3 class="pub-title">Logical Equivariance in Diffusion Language Models</h3>
+      <p class="pub-authors"><span class="me">Sunwoo Hong*</span>, Seo Hyun Kim*, Chen-Hao Chao, Younwoo Choi, Se-Young Yun, Rahul G. Krishnan</p>
+      <p class="pub-venue">Under review at ICLR 2027 · ICML 2026 Workshop on Foundations of Deep Generative Models</p>
+      <p class="pub-desc">Accuracy on one presentation of a problem hides failures on logically equivalent ones. We measure whether correctness survives answer-preserving rewrites, and a post-training recipe raises the all-view correctness of LLaDA-8B from 47.7% to 86.1%.</p>
       <div class="pub-links">
-        <a href="#" target="_blank" rel="noopener">arXiv</a>
-        <a href="#" target="_blank" rel="noopener">PDF</a>
+        <a href="https://openreview.net/forum?id=BC3jb6452Y" target="_blank" rel="noopener">OpenReview</a>
       </div>
+    </article>
+
+    <article class="pub">
+      <span class="pub-badge">Workshop</span>
+      <h3 class="pub-title">Route-Guided CBF-QP Repair for Safe Vision-Language-Action Models</h3>
+      <p class="pub-authors">Chan Park, <span class="me">Sunwoo Hong</span>, Kirak Kim, Yoonjeong Park, Alexander W. Olson, Ali Pesaranghader</p>
+      <p class="pub-venue">RSS 2026 Workshop on Trustworthy Embodied Foundation Models</p>
+      <p class="pub-desc">A repair module that adds route guidance to a CBF-QP safety filter, so a vision-language-action policy can rejoin its task trajectory after avoiding an obstacle.</p>
+      <div class="pub-links">
+        <a href="https://ckck12.github.io/Route-Guied-CBF-QP/paper.pdf" target="_blank" rel="noopener">PDF</a>
+        <a href="https://ckck12.github.io/Route-Guied-CBF-QP/" target="_blank" rel="noopener">Project</a>
+        <a href="https://github.com/Ckck12/Route-Guied-CBF-QP" target="_blank" rel="noopener">Code</a>
+      </div>
+    </article>
+
+    <!-- 제출 후에는 배지를 "Under review"로, venue를 "Under review at CVPR 2027"로 바꾸세요 -->
+    <article class="pub">
+      <span class="pub-badge">In preparation</span>
+      <h3 class="pub-title">Do World Models Need Clocks? Next-Event State Prediction for Physical Planning</h3>
+      <p class="pub-authors"><span class="me">Sunwoo Hong</span></p>
+      <p class="pub-venue">In preparation</p>
+      <p class="pub-desc">A world model that predicts the next physical event, its elapsed time, and the resulting state for each candidate action, instead of rolling out fixed-interval frames.</p>
     </article>
   </div>
 </section>
@@ -375,8 +436,8 @@
 <!-- ================= FOOTER ================= -->
 <footer>
   <div class="wrap">
-    <span>Last updated: 2026</span>
-    <span>© Your Name</span>
+    <span>Last updated: October 2026</span>
+    <span>© Sunwoo Hong</span>
   </div>
 </footer>
 
