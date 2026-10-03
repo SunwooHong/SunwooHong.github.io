@@ -284,18 +284,19 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   white-space: nowrap; border: 0;
 }
 .squirrel-stage {
-  /* A small illustrated squirrel: dark ink outline, flat warm colour printed a
-     little off the line, a colour-pencil texture and a few hatched shadows.
-     It keeps the same colours in both themes, like a sticker on the page. */
-  --sq-ink: #231A13;
+  /* A small illustrated squirrel, drawn lightly: a soft brown pencil outline with
+     small breaks and a second faint pass, warm colour laid a little off the line
+     so paper shows at the edges, and visible colour-pencil strokes. It keeps the
+     same colours in both themes, like a sticker on the page. */
+  --sq-ink: #4A3626;
   --sq-paper: #FFFFFF;
   --sq-wash: #B37B47;
-  --sq-wash-o: .9;
-  --sq-belly: #F2E4CC;
+  --sq-wash-o: .58;
+  --sq-belly: #F6EBD9;
   --sq-blush: #9E4B26;
-  --sq-blush-o: .22;
-  --sq-tex: #5C3A1E;
-  --sq-tex-o: .16;
+  --sq-blush-o: .18;
+  --sq-tex: #7A4C28;
+  --sq-tex-o: .32;
   --sq-nut: #E2B57E;
   --sq-nut-cap: #7A4C28;
   --sq-scarf: var(--leaf);
@@ -306,11 +307,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   color: var(--acorn);
 }
 :root[data-theme="dark"] .squirrel-stage {
-  --sq-ink: #1A120D;
+  --sq-ink: #3A2A1E;
   --sq-paper: #F4ECE1;
-  --sq-wash: #BE8650;
-  --sq-wash-o: .92;
-  --sq-blush-o: .24;
+  --sq-wash: #C08A55;
+  --sq-wash-o: .7;
+  --sq-belly: #F2E4CC;
+  --sq-blush-o: .2;
+  --sq-tex: #6B4428;
+  --sq-tex-o: .3;
 }
 .squirrel-stage * { pointer-events: none !important; }
 /* Only the squirrel itself and its hint slip take clicks; the rest of the
@@ -334,7 +338,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 
 /* Drawing layers */
 .squirrel-art .sq-paper { fill: var(--sq-paper); }
-.squirrel-art .sq-wash { fill: var(--sq-wash); opacity: var(--sq-wash-o); }
+.squirrel-art .sq-wash { fill: var(--sq-wash); opacity: var(--sq-wash-o); transform: translate(2.2px, 1.8px); }
 .squirrel-art .sq-belly { fill: var(--sq-belly); }
 .squirrel-art .sq-blush { fill: var(--sq-blush); opacity: var(--sq-blush-o); }
 .squirrel-art .sq-shade { fill: var(--sq-ink); opacity: .2; }
@@ -345,14 +349,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   fill: none; stroke: var(--sq-ink);
   stroke-linecap: round; stroke-linejoin: round;
 }
-.squirrel-art .sq-line { stroke-width: 2.3; }
-.squirrel-art .sq-thin { stroke-width: 1.85; }
-.squirrel-art .sq-fine { stroke-width: 1.05; }
-.squirrel-art .sq-mark { stroke-width: 1.4; }
+.squirrel-art .sq-line { stroke-width: 1.6; opacity: .92; stroke-dasharray: 38 2.2 16 1.8 54 2.6 24 2; }
+.squirrel-art .sq-thin { stroke-width: 1.3; }
+.squirrel-art .sq-fine { stroke-width: .85; opacity: .92; }
+.squirrel-art .sq-mark { stroke-width: 1.15; opacity: .92; }
 .squirrel-art .sq-faint { opacity: .4; }
 .squirrel-art .sq-texture { stroke: var(--sq-tex); stroke-width: .55; opacity: var(--sq-tex-o); }
-.squirrel-art .sq-hatch { stroke-width: .6; opacity: .3; }
-.squirrel-art .sq-ghost { stroke-width: .8; opacity: .2; }
+.squirrel-art .sq-hatch { stroke-width: .6; opacity: .4; }
+.squirrel-art .sq-ghost { stroke-width: .8; opacity: .38; }
 .squirrel-art .sq-whisker { stroke-width: .5; opacity: .4; }
 .squirrel-art .sq-ground { stroke-width: .9; opacity: .25; }
 .squirrel-art .sq-ink-fill { fill: var(--sq-ink); }
@@ -535,6 +539,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .oak .oak-ground { opacity: .5; }
 .oak.is-growing svg { animation: oak-grow 1.2s cubic-bezier(.2, .8, .25, 1) both; }
 .oak.is-wiggling svg { animation: oak-wiggle .5s ease-in-out; }
+.oak.is-wilting svg { animation: oak-wilt .9s ease-in forwards; }
+@keyframes oak-wilt {
+  0% { transform: rotate(0) scale(1); opacity: 1; }
+  40% { transform: rotate(-14deg) scale(.9, .8); opacity: .8; }
+  100% { transform: rotate(-20deg) scale(.2, 0); opacity: 0; }
+}
 @keyframes oak-wiggle {
   0%, 100% { transform: rotate(0); }
   25% { transform: rotate(-8deg); }

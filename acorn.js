@@ -14,6 +14,8 @@
 
   const STORAGE_KEY = 'sunwoo.squirrel.acorn.v1';   // sessionStorage: where the acorn is
   const TRIPS_KEY = 'sunwoo.squirrel.trips.v1';     // localStorage: finished round trips
+  const TRIPS_AT_KEY = 'sunwoo.squirrel.trips-at.v1'; // localStorage: when the last one finished
+  const OAK_LIFETIME = 60 * 60 * 1000;               // a grown oak disappears an hour later
   const OAK_SEEN_KEY = 'sunwoo.squirrel.oak.v1';    // localStorage: last oak stage shown growing
   const FOUND_KEY = 'sunwoo.squirrel.found.v1';     // localStorage: easter eggs already found
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -72,15 +74,15 @@
   const roughness = [3, 11, 23].map(function (seed, i) {
     return '<filter id="sq-rough-' + i + '" x="-8%" y="-14%" width="116%" height="128%" ' +
       'color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".08" ' +
-      'numOctaves="2" seed="' + seed + '"/><feDisplacementMap in="SourceGraphic" scale="1.7" ' +
+      'numOctaves="2" seed="' + seed + '"/><feDisplacementMap in="SourceGraphic" scale="2.1" ' +
       'xChannelSelector="R" yChannelSelector="G"/></filter>';
   }).join('');
 
   const stage = document.createElement('div');
   stage.className = 'squirrel-stage';
   stage.hidden = true;
-  // The drawing below is pre-generated: ink outline, flat colour printed a little
-  // off the line, colour-pencil texture and a few hatched shadows.
+  // The drawing below is pre-generated: pencil outline, colour laid a little off
+  // the line, colour-pencil texture and a few hatched shadows.
   stage.innerHTML = `
   <button type="button" class="squirrel-actor" aria-label="The squirrel. Click it for a hint.">
     <span class="squirrel-facing">
@@ -147,7 +149,7 @@
     { id: 'call', hint: 'Call me by name. Type <kbd>squirrel</kbd> or <kbd>acorn</kbd> anywhere on the page and I’ll pop up from the bottom edge.' },
     { id: 'oak', hint: 'Every round trip plants something at the top, next to About. Look again after one, two and three trips.' },
     { id: 'shower', hint: 'Shake the tree: scroll up and down, hard, a few times in a row. Mind your head.' },
-    { id: 'denoise', hint: 'Click a page title three times. Its letters get masked, then decoded a few at a time, the way a masked diffusion model writes.' },
+    { id: 'denoise', hint: 'Click my name three times. Its letters get masked, then decoded a few at a time, the way a masked diffusion model writes.' },
     { id: 'hurry', hint: 'In a rush? While I’m out on an errand, press the acorn three more times. I’ll hurry.' },
     { id: 'seek', hint: 'Lend me the acorn, then scroll all the way down. I like to hide near the footer.' },
     { id: 'mood', hint: 'Visit after 11 pm, or sometime in winter. I dress for the occasion.' }
@@ -722,7 +724,8 @@
      Squirrels forget many of the acorns they bury, and some become oaks. Every
      finished round trip is counted (in this browser only): one trip grows a
      sprout next to About, two a sapling, three a young oak, which drops acorns
-     when clicked. It grows where the visitor is already looking. */
+     when clicked. It grows where the visitor is already looking, and it is
+     gone again an hour after the last round trip. */
   const OAK = [
     { at: 1, label: 'A sprout from a forgotten acorn',
       art: '<path class="oak-ground" d="M3.4 17.7c4.2-.5 9-.6 13.2 0"/>' +
@@ -745,7 +748,17 @@
   ];
   const oakNote = 'Squirrels forget many of the acorns they bury. Some grow into oaks.';
 
-  function tripCount() { return parseInt(readStore('localStorage', TRIPS_KEY) || '0', 10) || 0; }
+  function lastTripAt() { return parseInt(readStore('localStorage', TRIPS_AT_KEY) || '0', 10) || 0; }
+  // Trips older than an hour no longer count; the oak goes with them.
+  function tripCount() {
+    const count = parseInt(readStore('localStorage', TRIPS_KEY) || '0', 10) || 0;
+    if (count && Date.now() - lastTripAt() > OAK_LIFETIME) {
+      writeStore('localStorage', TRIPS_KEY, '0');
+      writeStore('localStorage', OAK_SEEN_KEY, '0');
+      return 0;
+    }
+    return count;
+  }
 
   function oakStage(trips) {
     let stageIndex = 0;
@@ -754,13 +767,27 @@
   }
 
   let oakObserver = null;
-  function renderOak() {
+  let oakTimer = 0;
+  function renderOak(wilt) {
     const host = nav.querySelector('.nav-links');
     if (!host) return;
+    clearTimeout(oakTimer);
     const stageIndex = oakStage(tripCount());
     let oak = host.querySelector('.oak');
-    if (!stageIndex) { if (oak) oak.remove(); return; }
+    if (oak && oak.classList.contains('is-wilting')) { oak.remove(); oak = null; }
+    if (!stageIndex) {
+      if (!oak) return;
+      // Its hour is up: wilt away if someone is watching, otherwise just go.
+      if (wilt && !motionPreference.matches) {
+        oak.classList.add('is-wilting');
+        setTimeout(function () { oak.remove(); }, 900);
+      } else oak.remove();
+      return;
+    }
     markFound('oak');
+    // Check again the moment the hour runs out, in case the page is still open.
+    oakTimer = setTimeout(function () { renderOak(true); },
+      Math.max(1000, lastTripAt() + OAK_LIFETIME - Date.now() + 500));
     if (!oak) {
       oak = document.createElement('button');
       oak.type = 'button';
@@ -797,7 +824,9 @@
   }
 
   function countTrip() {
-    writeStore('localStorage', TRIPS_KEY, String(tripCount() + 1));
+    const count = tripCount() + 1;
+    writeStore('localStorage', TRIPS_KEY, String(count));
+    writeStore('localStorage', TRIPS_AT_KEY, String(Date.now()));
     renderOak();
   }
 
@@ -951,6 +980,7 @@
   window.addEventListener('pagehide', cancelVisit);
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) cancelVisit();
+    else renderOak(true);
   });
   if (motionPreference.addEventListener) motionPreference.addEventListener('change', cancelVisit);
   else if (motionPreference.addListener) motionPreference.addListener(cancelVisit);
