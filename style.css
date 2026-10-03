@@ -239,6 +239,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 }
 
 
+
 /* ================= ACORN & SQUIRREL =================
    A small opt-in visitor. Nothing animates until the acorn is pressed.
    The overlay never receives pointer events or changes the page layout.
@@ -251,12 +252,13 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   border: 0; border-radius: 50%; background: none;
   color: var(--muted); cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: color .15s ease, background-color .15s ease;
+  transition: color .15s ease, background-color .15s ease, transform .15s ease;
 }
 .acorn-toggle[hidden], .squirrel-stage[hidden], .squirrel-transfer[hidden] {
   display: none !important;
 }
 .acorn-toggle:hover { color: var(--cap); background: var(--husk); }
+.acorn-toggle:active { transform: scale(.97); }
 .acorn-toggle:focus-visible {
   outline: 2px solid var(--acorn); outline-offset: 2px;
 }
@@ -273,8 +275,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .acorn-toggle.is-busy { cursor: progress; }
 .acorn-toggle.just-returned .acorn-icon { animation: acorn-home .42s ease-out; }
 @keyframes acorn-home {
-  0% { transform: scale(.84); }
-  48% { transform: scale(1.12); }
+  0% { transform: scale(.84) rotate(-10deg); }
+  48% { transform: scale(1.12) rotate(6deg); }
   100% { transform: scale(1); }
 }
 .squirrel-status {
@@ -292,6 +294,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   --sq-outline: #70492F;
   --sq-eye: #382519;
   --sq-ear: #E6B790;
+  --sq-door: #F2E2C7;
+  --sq-door-line: #D5BE9D;
   position: fixed; inset: 0; z-index: 70;
   overflow: hidden; contain: layout style paint;
   pointer-events: none !important;
@@ -307,8 +311,50 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   --sq-outline: #805335;
   --sq-eye: #342217;
   --sq-ear: #EDC3A0;
+  --sq-door: #32271F;
+  --sq-door-line: #5D4A3B;
 }
 .squirrel-stage * { pointer-events: none !important; }
+.squirrel-burrow {
+  position: absolute; top: 0; left: 0;
+  width: 48px; height: 32px;
+  will-change: transform, opacity;
+}
+.squirrel-burrow[hidden] { display: none !important; }
+.burrow-shadow {
+  position: absolute; left: 4px; right: 4px; bottom: 0;
+  height: 10px; border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.14), rgba(0,0,0,0));
+}
+.burrow-hole {
+  position: absolute; left: 7px; right: 7px; top: 8px; bottom: 3px;
+  border-radius: 16px 16px 10px 10px;
+  background: linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,.08) 55%, rgba(0,0,0,.22));
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.18);
+}
+.burrow-door {
+  position: absolute; left: 7px; right: 7px; top: 1px;
+  height: 19px;
+  border: 1px solid var(--sq-door-line);
+  border-bottom: 0;
+  border-radius: 14px 14px 4px 4px;
+  background: linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,.18)), var(--sq-door);
+  transform-origin: 50% 0%;
+  transform: translateY(0) rotateX(0deg);
+  transition: transform .24s ease, opacity .24s ease;
+  box-shadow: 0 1px 0 rgba(255,255,255,.22) inset;
+}
+.burrow-knob {
+  position: absolute; left: 50%; top: 6px;
+  width: 6px; height: 6px; margin-left: -3px;
+  border-radius: 50%;
+  background: var(--acorn);
+  opacity: .8;
+}
+.squirrel-burrow.is-open .burrow-door {
+  transform: translateY(-6px) rotateX(68deg);
+  opacity: .88;
+}
 .squirrel-actor {
   position: absolute; top: 0; left: 0;
   width: 88px; height: 71.5px;
@@ -341,6 +387,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .squirrel-actor.is-sniffing .sq-head { animation: squirrel-sniff .38s ease-in-out infinite; }
 .squirrel-actor.is-sniffing .sq-tail { animation: squirrel-tail .76s ease-in-out infinite; }
 .squirrel-actor.is-sniffing .sq-eye { animation: squirrel-blink .75s ease-in-out; transform-origin: 93px 43px; }
+.squirrel-actor.is-alert .sq-head { animation: squirrel-alert .32s ease-in-out infinite; }
+.squirrel-actor.is-alert .sq-tail { animation: squirrel-tail .24s ease-in-out infinite; }
+.squirrel-actor.is-peeking .sq-head { animation: squirrel-peek .44s ease-in-out infinite; }
+.squirrel-actor.is-peeking .sq-tail { animation: squirrel-tail .9s ease-in-out infinite; }
 @keyframes squirrel-stride {
   0%, 100% { transform: rotate(-23deg); }
   50% { transform: rotate(25deg); }
@@ -353,6 +403,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   0%, 100% { transform: rotate(0); }
   50% { transform: rotate(-8deg) translateY(-1px); }
 }
+@keyframes squirrel-alert {
+  0%, 100% { transform: rotate(-2deg) translateY(-1px); }
+  50% { transform: rotate(-14deg) translateY(-2px); }
+}
+@keyframes squirrel-peek {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  50% { transform: rotate(7deg) translateY(-1px); }
+}
 @keyframes squirrel-blink {
   0%, 40%, 60%, 100% { transform: scaleY(1); }
   50% { transform: scaleY(.12); }
@@ -364,7 +422,6 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 }
 .squirrel-transfer svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
-/* Keep the additional control on one row, including 320px-wide phones. */
 .nav-links { flex-shrink: 0; }
 .theme-toggle { flex-shrink: 0; }
 @media (max-width: 420px) {
@@ -373,8 +430,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   .nav-links a { font-size: .84rem; }
   .mark img { width: 22px; height: 22px; }
   .acorn-toggle, .theme-toggle { width: 28px; flex-basis: 28px; margin-left: 0; }
+  .squirrel-burrow { width: 42px; height: 28px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .acorn-toggle, .squirrel-stage * { transition: none !important; animation: none !important; }
   .acorn-toggle.just-returned .acorn-icon { animation: none; }
 }
+

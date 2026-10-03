@@ -1,17 +1,18 @@
 /*
- * A little squirrel, an acorn, and a round trip.
- * Dependency-free; works on a static site and with local HTML files.
- * Click once to lend the acorn. Click again to have it returned.
+ * Secret-door squirrel for the top navigation.
+ * Click the acorn once: the squirrel sneaks out and steals it.
+ * Click again: it sneaks back and politely returns it.
  */
 (function () {
   'use strict';
 
   const button = document.getElementById('acorn-toggle');
   const nav = document.querySelector('.nav');
-  if (!button || !nav || button.dataset.squirrelReady === 'true') return;
+  const mark = document.querySelector('.mark');
+  if (!button || !nav || !mark || button.dataset.squirrelReady === 'true') return;
   button.dataset.squirrelReady = 'true';
 
-  const STORAGE_KEY = 'sunwoo.squirrel.acorn.v1';
+  const STORAGE_KEY = 'sunwoo.squirrel.secret_door.v2';
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   let away = false;
   try { away = sessionStorage.getItem(STORAGE_KEY) === 'away'; } catch (_) {}
@@ -19,6 +20,7 @@
   let activeController = null;
   let direction = 1;
   let position = { x: 0, y: 0 };
+  let mouse = { x: -10000, y: -10000 };
   let scale = 88 / 128;
   let spriteWidth = 88;
   let spriteHeight = 71.5;
@@ -30,7 +32,6 @@
   status.setAttribute('aria-atomic', 'true');
   document.body.appendChild(status);
 
-  // Reuse the actual navigation icon, so the acorn in its paws is identical.
   const sourceIcon = button.querySelector('.acorn-icon');
   const acornDrawing = sourceIcon.innerHTML;
   const stage = document.createElement('div');
@@ -38,6 +39,11 @@
   stage.hidden = true;
   stage.setAttribute('aria-hidden', 'true');
   stage.innerHTML = `
+    <div class="squirrel-burrow" hidden>
+      <div class="burrow-shadow"></div>
+      <div class="burrow-hole"></div>
+      <div class="burrow-door"><span class="burrow-knob"></span></div>
+    </div>
     <div class="squirrel-actor">
       <div class="squirrel-facing">
         <svg class="squirrel-art" viewBox="0 0 128 104" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -99,6 +105,7 @@
   const actor = stage.querySelector('.squirrel-actor');
   const facing = stage.querySelector('.squirrel-facing');
   const transfer = stage.querySelector('.squirrel-transfer');
+  const burrow = stage.querySelector('.squirrel-burrow');
   const heldIcon = stage.querySelector('.sq-held-icon');
   const flyingIcon = sourceIcon.cloneNode(true);
   flyingIcon.removeAttribute('class');
@@ -108,15 +115,14 @@
     button.dataset.acorn = away ? 'away' : 'home';
     button.setAttribute('aria-pressed', String(away));
     button.setAttribute('aria-busy', String(busy));
-    button.setAttribute('aria-disabled', String(busy));
     button.classList.toggle('is-busy', busy);
-    button.title = busy ? 'The squirrel is on its way…' :
-      (away ? 'Ask the squirrel to bring the acorn back' : 'Let the squirrel take the acorn');
+    button.title = busy
+      ? 'Psst… the squirrel is sneaking about.'
+      : (away ? 'Knock to have the squirrel bring the acorn back.' : 'Knock to let the squirrel sneak the acorn away.');
   }
 
   function setAway(next) {
     away = next;
-    // Per-tab state: navigation between these pages keeps the same acorn.
     try { sessionStorage.setItem(STORAGE_KEY, away ? 'away' : 'home'); } catch (_) {}
     syncButton();
   }
@@ -131,7 +137,6 @@
     if (signal.aborted) throw abortError();
   }
 
-  // No requestAnimationFrame loop is running while the feature is idle.
   function animate(duration, update, signal) {
     return new Promise(function (resolve, reject) {
       if (signal.aborted) { reject(abortError()); return; }
@@ -178,11 +183,9 @@
     facing.style.transform = 'scaleX(' + direction + ')';
   }
 
-  // Coordinates are relative to the viewport; position is the feet's center.
   function place(x, y) {
     position = { x: x, y: y };
-    actor.style.transform = 'translate3d(' + (x - spriteWidth / 2).toFixed(2) +
-      'px,' + (y - spriteHeight).toFixed(2) + 'px,0)';
+    actor.style.transform = 'translate3d(' + (x - spriteWidth / 2).toFixed(2) + 'px,' + (y - spriteHeight).toFixed(2) + 'px,0)';
   }
 
   function handPoint(x, y) {
@@ -206,7 +209,9 @@
         const step = Math.abs(Math.sin(t * duration / 66)) * 2 * Math.sin(Math.PI * t);
         place(start.x + (x - start.x) * e, start.y + (y - start.y) * e - hop - step);
       }, signal);
-    } finally { actor.classList.remove('is-running'); }
+    } finally {
+      actor.classList.remove('is-running');
+    }
   }
 
   async function sniff(duration, signal) {
@@ -215,9 +220,14 @@
     finally { actor.classList.remove('is-sniffing'); }
   }
 
+  async function alertPause(duration, signal) {
+    actor.classList.add('is-alert');
+    try { await pause(duration, signal); }
+    finally { actor.classList.remove('is-alert'); }
+  }
+
   function putTransferAt(point, iconSize, angle) {
-    transfer.style.transform = 'translate3d(' + (point.x - iconSize / 2).toFixed(2) +
-      'px,' + (point.y - iconSize / 2).toFixed(2) + 'px,0) rotate(' + angle + 'deg)';
+    transfer.style.transform = 'translate3d(' + (point.x - iconSize / 2).toFixed(2) + 'px,' + (point.y - iconSize / 2).toFixed(2) + 'px,0) rotate(' + angle + 'deg)';
   }
 
   async function moveAcorn(from, to, geometry, signal) {
@@ -232,6 +242,19 @@
     }, signal);
   }
 
+  function setBurrowAt(g) {
+    burrow.style.transform = 'translate3d(' + (g.door.x - g.doorWidth / 2).toFixed(2) + 'px,' + (g.door.y - g.doorHeight / 2).toFixed(2) + 'px,0)';
+  }
+
+  function openBurrow() {
+    burrow.hidden = false;
+    burrow.classList.add('is-open');
+  }
+
+  function closeBurrow() {
+    burrow.classList.remove('is-open');
+  }
+
   function measure() {
     const width = document.documentElement.clientWidth;
     const height = window.innerHeight;
@@ -240,6 +263,9 @@
     spriteHeight = 104 * scale;
     actor.style.width = spriteWidth + 'px';
     actor.style.height = spriteHeight + 'px';
+
+    const navRect = nav.getBoundingClientRect();
+    const markRect = mark.getBoundingClientRect();
     const rect = sourceIcon.getBoundingClientRect();
     const target = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
     const iconSize = rect.width || 19;
@@ -250,17 +276,61 @@
     heldIcon.setAttribute('height', rawIconSize);
     transfer.style.width = iconSize + 'px';
     transfer.style.height = iconSize + 'px';
-    // Its raised paw meets the exact center of the button, not a hardcoded x.
+
     const dock = { x: target.x - (104 - 64) * scale, y: target.y + (104 - 23) * scale };
-    const runway = Math.min(height - 8, nav.getBoundingClientRect().bottom + 44);
-    const lowLane = Math.min(height - 8, runway + (width > 700 ? 64 : 23));
-    return { width, height, target, iconSize, dock, runway, lowLane };
+    const runway = Math.min(height - 8, navRect.bottom + (width > 700 ? 34 : 28));
+    const lane = Math.min(height - 8, runway + (width > 700 ? 10 : 6));
+    const door = {
+      x: Math.max(28, markRect.left + markRect.width * 0.84),
+      y: Math.min(height - 20, navRect.bottom - 2)
+    };
+    const doorWidth = width <= 700 ? 42 : 48;
+    const doorHeight = width <= 700 ? 28 : 32;
+    return { width, height, target, iconSize, dock, runway, lane, door, doorWidth, doorHeight };
+  }
+
+  async function maybeFreezeIfWatched(g, signal) {
+    const nearTarget = Math.hypot(mouse.x - g.target.x, mouse.y - g.target.y) < (g.width <= 700 ? 82 : 100);
+    const nearSelf = Math.hypot(mouse.x - position.x, mouse.y - (position.y - spriteHeight * 0.56)) < (g.width <= 700 ? 82 : 98);
+    if (nearTarget || nearSelf) {
+      await alertPause(420, signal);
+    }
+  }
+
+  async function popOut(g, returning, signal) {
+    setBurrowAt(g);
+    stage.hidden = false;
+    openBurrow();
+    actor.classList.toggle('is-carrying', returning);
+    face(1);
+    place(g.door.x - 4, g.runway + 30);
+    actor.classList.add('is-peeking');
+    await animate(320, function (t) {
+      const e = ease(t);
+      place(g.door.x - 4, g.runway + 30 - 24 * e);
+    }, signal);
+    actor.classList.remove('is-peeking');
+    await sniff(180, signal);
+    await maybeFreezeIfWatched(g, signal);
+  }
+
+  async function tuckIntoBurrow(g, signal) {
+    face(-1);
+    await runTo(g.door.x + 6, g.runway + 2, 220, 4, signal);
+    actor.classList.add('is-peeking');
+    await animate(280, function (t) {
+      const e = ease(t);
+      place(g.door.x - 4, g.runway + 2 + 26 * e);
+    }, signal);
+    actor.classList.remove('is-peeking');
+    closeBurrow();
+    await pause(170, signal);
+    burrow.hidden = true;
   }
 
   async function takeAcorn(g, signal) {
     actor.classList.add('is-reaching');
-    await pause(200, signal);
-    // The visible object transfers to the squirrel exactly at the handoff.
+    await pause(190, signal);
     putTransferAt(g.target, g.iconSize, 0);
     transfer.hidden = false;
     setAway(true);
@@ -284,55 +354,50 @@
   }
 
   async function fullVisit(returning, g, signal) {
-    actor.classList.toggle('is-carrying', returning);
+    await popOut(g, returning, signal);
     if (returning) {
-      face(-1);
-      place(g.width + spriteWidth, g.lowLane);
-      stage.hidden = false;
-      await runTo(g.width * .87, g.lowLane, 440, 8, signal);
-      await runTo(g.width * .56, g.runway, 650, 18, signal);
-      await sniff(210, signal);
-      await runTo(g.width * .38, g.runway, 460, 5, signal);
-      await sniff(180, signal);
-      await runTo(g.dock.x, g.dock.y, 770, 12, signal);
+      await runTo(g.width * 0.26, g.runway, 440, 10, signal);
+      await sniff(160, signal);
+      await runTo(g.dock.x - 42, g.runway, 680, 7, signal);
+      await maybeFreezeIfWatched(g, signal);
+      await runTo(g.dock.x, g.dock.y, 300, 5, signal);
+      await sniff(120, signal);
+      await returnAcorn(g, signal);
+      await pause(130, signal);
+      await runTo(g.width * 0.22, g.runway, 720, 12, signal);
+      await tuckIntoBurrow(g, signal);
     } else {
-      face(1);
-      place(-spriteWidth, g.lowLane);
-      stage.hidden = false;
-      await runTo(g.width * .14, g.lowLane, 430, 8, signal);
-      await runTo(g.width * .23, g.runway, 460, 20, signal);
-      await runTo(g.width * .43, g.runway, 560, 5, signal);
-      await sniff(240, signal);
-      await runTo(g.width * .31, g.runway, 330, 5, signal);
-      await sniff(150, signal);
-      await runTo(g.dock.x - 36, g.runway, 590, 8, signal);
-      await runTo(g.dock.x, g.dock.y, 300, 6, signal);
+      await runTo(g.width * 0.24, g.runway, 460, 10, signal);
+      await sniff(140, signal);
+      await runTo(g.dock.x - 42, g.runway, 680, 7, signal);
+      await maybeFreezeIfWatched(g, signal);
+      await runTo(g.dock.x, g.dock.y, 300, 5, signal);
+      await sniff(120, signal);
+      await takeAcorn(g, signal);
+      await pause(130, signal);
+      await runTo(g.width * 0.22, g.runway, 720, 12, signal);
+      await tuckIntoBurrow(g, signal);
     }
-    face(1);
-    await sniff(130, signal);
-    if (returning) await returnAcorn(g, signal);
-    else await takeAcorn(g, signal);
-    await pause(180, signal);
-    // Leave the viewport completely; the overlay is removed from rendering.
-    if (returning) await runTo(-spriteWidth, g.runway, 1000, 19, signal);
-    else await runTo(g.width + spriteWidth, g.runway, 920, 18, signal);
   }
 
   async function quietVisit(returning, g, signal) {
-    // Respect reduced-motion preferences: a stationary visitor, no running.
+    stage.hidden = false;
+    setBurrowAt(g);
+    openBurrow();
     face(1);
     place(g.dock.x, g.dock.y);
     actor.classList.add('is-reaching');
     actor.classList.toggle('is-carrying', returning);
-    stage.hidden = false;
-    await pause(140, signal);
+    await pause(120, signal);
     setAway(!returning);
     actor.classList.toggle('is-carrying', !returning);
-    await pause(180, signal);
+    await pause(120, signal);
+    actor.classList.remove('is-reaching');
+    closeBurrow();
   }
 
   async function visit() {
-    if (busy) return; // Repeated clicks never spawn overlapping squirrels.
+    if (busy) return;
     busy = true;
     const returning = away;
     const controller = new AbortController();
@@ -350,20 +415,30 @@
       if (error.name !== 'AbortError') console.error('Squirrel animation:', error);
     } finally {
       stage.hidden = true;
+      burrow.hidden = true;
       transfer.hidden = true;
-      actor.classList.remove('is-running', 'is-reaching', 'is-sniffing', 'is-carrying');
+      actor.classList.remove('is-running', 'is-reaching', 'is-sniffing', 'is-carrying', 'is-alert', 'is-peeking');
       button.classList.remove('just-returned');
       if (activeController === controller) activeController = null;
       busy = false;
       syncButton();
       status.textContent = interrupted
-        ? (away ? 'The acorn is away. Press again to bring it back.' : 'The acorn is here. Press again to call the squirrel.')
-        : (away ? 'The squirrel took the acorn. Press again to bring it back.' : 'The squirrel returned the acorn.');
+        ? (away ? 'The squirrel still has the acorn. Press again to ask for it back.' : 'The acorn is at home. Press again to knock on the little hidden door.')
+        : (away ? 'The squirrel quietly borrowed the acorn.' : 'The squirrel returned the acorn and slipped back inside.');
     }
   }
 
   function cancelVisit() { if (activeController) activeController.abort(); }
+
   button.addEventListener('click', visit);
+  document.addEventListener('mousemove', function (event) {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+  }, { passive: true });
+  document.addEventListener('mouseleave', function () {
+    mouse.x = -10000;
+    mouse.y = -10000;
+  });
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape' && busy) cancelVisit();
   });
@@ -374,13 +449,13 @@
   });
   if (motionPreference.addEventListener) motionPreference.addEventListener('change', cancelVisit);
   else if (motionPreference.addListener) motionPreference.addListener(cancelVisit);
-  // Re-sync after the browser restores a document from its back/forward cache.
   window.addEventListener('pageshow', function () {
     if (!busy) {
       try { away = sessionStorage.getItem(STORAGE_KEY) === 'away'; } catch (_) {}
       syncButton();
     }
   });
+
   syncButton();
   button.hidden = false;
 })();
