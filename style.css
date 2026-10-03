@@ -225,31 +225,69 @@ h2 a { font-family: var(--sans); font-size: .9rem; font-weight: 400; letter-spac
 .plist .tag { font-style: normal; font-weight: 600; color: var(--leaf); }
 
 /* ================= CLOSING THE GAP (index.html) =================
-   "Close the gap", drawn: two banks and three stepping stones between them. */
-.gap-map { margin: 6px 0 0; }
-.gap-map svg { display: block; width: 100%; max-width: 600px; height: auto; margin: 0 auto; overflow: visible; }
-.gap-map figcaption { text-align: center; color: var(--muted); font-size: .93rem; margin-top: 10px; }
-.gm-bank   { fill: var(--husk); stroke: var(--cap); stroke-width: 1.6; stroke-linejoin: round; }
-.gm-hatch  { fill: none; stroke: var(--line-strong); stroke-width: 1.3; stroke-linecap: round; }
-.gm-water  { fill: none; stroke: var(--line-strong); stroke-width: 1.4; stroke-linecap: round; }
+   "Close the gap", drawn: a river, two banks, three stepping stones.
+   Under the drawing, each stone is the question it started from. */
+:root { --stone-1: #EADBC0; --stone-2: #DAD6CE; --stone-3: #E2E8D2; --water: #8FAAB0; }
+:root[data-theme="dark"] { --stone-1: #54422E; --stone-2: #4A4640; --stone-3: #3C4531; --water: #7C999F; }
+.gap-lead { margin: 0 0 6px; }
+.gap-map { margin: 0; }
+.gap-map svg { display: block; width: 100%; max-width: 720px; height: auto; margin: 0 auto; overflow: visible; }
+.gm-pool   { fill: var(--water); fill-opacity: .13; stroke: none; }
+.gm-bank   { fill: var(--husk); stroke: var(--cap); stroke-width: 1.7; stroke-linejoin: round; }
+.gm-strata { fill: none; stroke: var(--line-strong); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.gm-crack  { fill: none; stroke: var(--muted); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
+.gm-hatch  { fill: none; stroke: var(--line-strong); stroke-width: 1.2; stroke-linecap: round; }
+.gm-pebble { fill: var(--paper); stroke: var(--muted); stroke-width: .9; opacity: .8; }
+.gm-grass, .gm-moss { fill: none; stroke: var(--leaf); stroke-width: 1.4; stroke-linecap: round; }
+.gm-water  { fill: none; stroke: var(--water); stroke-width: 1.5; stroke-linecap: round; }
+.gm-deep   { stroke-width: 1.2; opacity: .7; }
+.gm-ripple { fill: none; stroke: var(--water); stroke-width: 1.1; stroke-linecap: round; opacity: .9; }
+.gm-glint  { fill: none; stroke: var(--water); stroke-width: 1; stroke-linecap: round; opacity: .55; }
 .gm-route  { fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 2 6; }
 .gm-arrow  { fill: none; stroke: var(--muted); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
-.gm-stone  { fill: var(--husk); stroke: var(--acorn); stroke-width: 1.8; stroke-linejoin: round;
-             transition: transform .2s ease; transform-box: fill-box; transform-origin: 50% 100%; }
-.gm-stone-next { fill: none; stroke-dasharray: 5 5; }
-.gm-stone.is-lit { transform: translateY(-4px); stroke: var(--cap); }
-.gm-side   { font-family: var(--serif); font-style: italic; font-size: 12.5px; fill: var(--body); }
-.gm-axis   { font-family: var(--sans); font-weight: 600; font-size: 13px; fill: var(--ink); }
-.gm-paper  { font-family: var(--sans); font-size: 10.5px; fill: var(--muted); }
+.gm-stone  { transition: transform .2s ease; }
+.gm-rock   { stroke: var(--cap); stroke-width: 1.8; stroke-linejoin: round; }
+.gm-rock-1 { fill: var(--stone-1); }
+.gm-rock-2 { fill: var(--stone-2); }
+.gm-rock-3 { fill: var(--stone-3); fill-opacity: .55; stroke-dasharray: 6 5; }
+.gm-facet  { fill: none; stroke: var(--cap); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; opacity: .45; }
+.gm-stone-next .gm-facet { stroke-dasharray: 3 5; opacity: .35; }
+.gm-shade  { fill: none; stroke: var(--cap); stroke-width: 1; stroke-linecap: round; opacity: .4; }
+.gm-speck  { fill: none; stroke: var(--cap); stroke-width: 1.8; stroke-linecap: round; opacity: .45; }
+.gm-stone.is-lit { transform: translateY(-4px); }
+.gm-stone.is-lit .gm-rock { stroke: var(--acorn); stroke-width: 2.2; }
+.gm-side   { font-family: var(--serif); font-style: italic; font-size: 14px; fill: var(--body); }
+.gm-axis   { font-family: var(--sans); font-weight: 600; font-size: 14px; fill: var(--ink); }
+
+.gm-paper  { font-family: var(--sans); font-size: 12px; fill: var(--muted); }
 .gap-map a .gm-paper { fill: var(--acorn); cursor: pointer; }
 .gap-map a:hover .gm-paper, .gap-map a:focus-visible .gm-paper { fill: var(--cap); text-decoration: underline; }
 .gap-map a { outline: none; }
-.gap-invite { margin: 22px 0 0; }
+.gm-stone, .gm-label { cursor: pointer; -webkit-tap-highlight-color: transparent; outline: none; }
+.gm-stone.is-open { transform: translateY(-4px); }
+.gm-stone.is-open .gm-rock { stroke: var(--acorn); stroke-width: 2.2; }
+/* 그림 아래 한 자리에 안내 문구와 세 설명을 겹쳐 두고, 고른 것만 보이게 합니다 (높이가 변하지 않습니다) */
+.gap-notes { display: grid; justify-items: center; align-items: start; margin-top: 18px; text-align: center; }
+.gap-notes > * { grid-area: 1 / 1; max-width: 560px; margin: 0;
+                 opacity: 0; visibility: hidden; transition: opacity .18s ease, visibility .18s; }
+.gap-hint { color: var(--muted); font-size: .92rem; font-style: italic; align-self: center; }
+.gap-notes:not(.has-active) .gap-hint,
+.gap-note.is-lit, .gap-note.is-open { opacity: 1; visibility: visible; }
+/* 마우스가 올라간 돌이 눌러서 고정한 돌보다 우선합니다 */
+.gap-notes:has(.is-lit) .gap-note.is-open:not(.is-lit) { opacity: 0; visibility: hidden; }
+.gs-q { font-family: var(--serif); font-style: italic; font-size: 1.18rem; line-height: 1.3; color: var(--ink); margin: 0 0 7px; }
+.gs-a { font-size: .95rem; line-height: 1.55; margin: 0; }
+.gs-tags { display: none; font-size: .84rem; color: var(--muted); margin: 9px 0 0; }
+.gap-invite { margin: 26px 0 0; }
 @media (max-width: 700px) {
-  /* 작은 화면: 논문 이름은 숨기고 축 이름을 키웁니다 */
+  /* 작은 화면: 이름표를 키우고 가운데 이름표는 한 줄 내립니다. 논문 이름은 그림에서 숨기고 설명 안에 넣습니다. */
+  .gap-map svg { overflow: visible; }
+  .gm-axis  { font-size: 23px; }
+  .gm-axis-mid { transform: translateY(26px); }
+  .gm-side  { font-size: 17.5px; }
   .gm-paper { display: none; }
-  .gm-axis  { font-size: 17px; }
-  .gm-side  { font-size: 14.5px; }
+  .gap-notes { margin-top: 26px; }
+  .gs-tags { display: block; }
 }
 
 /* ================= FOOTER ================= */
@@ -277,7 +315,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .pub, a, .gm-stone { transition: none; }
+  .pub, a, .gm-stone, .gap-notes > * { transition: none; }
   .pub:hover { transform: none; }
 }
 

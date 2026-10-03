@@ -258,43 +258,110 @@
 </section>
 
 <!-- ================= CLOSING THE GAP =================
-     소개글의 "close the gap"을 그림으로 옮긴 것: 두 기슭과 그 사이의 디딤돌 셋.
-     돌마다 연구의 한 갈래이고, 논문 이름을 누르면 위쪽 카드로 갑니다. 점선 돌은 지금 놓는 중입니다. -->
+     소개글의 "close the gap"을 그림으로 옮긴 것: 강과 두 기슭, 그 사이의 디딤돌 셋.
+     돌에 마우스를 올리면(또는 누르면) 그 돌의 질문이 뜨고, 돌 아래 논문 이름을 누르면 위쪽 카드로 갑니다.
+     점선 돌은 지금 놓는 중입니다. -->
 <section id="contact">
   <div class="wrap">
     <h2>Closing the gap</h2>
+    <p class="gap-lead">Three questions still stand between the two banks.</p>
     <figure class="gap-map">
-      <svg viewBox="0 26 520 206" role="img"
-           aria-label="A gap between what models can do and what people do easily, crossed by three stepping stones: reasoning, efficient learning, and world models. The third stone is still being laid.">
-        <!-- 두 기슭 -->
-        <path class="gm-bank" d="M0 113 C16 110 32 115 48 112 C60 110 72 113 82 112 C86 140 79 178 84 228 L0 228 Z"/>
-        <path class="gm-bank" d="M520 73 C504 70 488 75 472 72 C462 70 454 73 446 72 C442 112 450 170 444 228 L520 228 Z"/>
-        <path class="gm-hatch" d="M10 134 l13 -8 M26 152 l14 -9 M8 174 l13 -8 M42 186 l13 -8 M18 206 l14 -9 M54 142 l12 -8 M56 214 l12 -8"/>
-        <path class="gm-hatch" d="M462 98 l13 -8 M486 116 l14 -9 M500 96 l12 -8 M466 150 l13 -8 M492 172 l14 -9 M470 200 l13 -8 M500 138 l12 -8"/>
-        <!-- 물결 -->
-        <path class="gm-water" d="M98 222 q8 -5 16 0 t16 0 M168 225 q8 -5 16 0 t16 0 M238 221 q8 -5 16 0 t16 0 M308 225 q8 -5 16 0 t16 0 M378 222 q8 -5 16 0 t16 0"/>
-        <!-- 건너가는 길 -->
-        <path class="gm-route" d="M74 108 Q108 88 140 136 M160 136 Q204 90 250 114 M270 114 Q322 66 370 92 M392 92 Q418 50 452 66"/>
-        <path class="gm-arrow" d="M443 58 L453 66 L441 71"/>
-        <!-- 디딤돌 셋: 마지막 돌은 아직 놓는 중이라 점선 -->
-        <path class="gm-stone" data-stone="reasoning" d="M120 151 C122 142 136 139 152 140 C168 141 180 145 180 152 C180 160 167 163 149 163 C133 163 118 159 120 151 Z"/>
-        <path class="gm-stone" data-stone="efficient-learning" d="M230 129 C232 120 246 117 262 118 C278 119 290 123 290 130 C290 138 277 141 259 141 C243 141 228 137 230 129 Z"/>
-        <path class="gm-stone gm-stone-next" data-stone="world-models" d="M350 107 C352 98 366 95 382 96 C398 97 410 101 410 108 C410 116 397 119 379 119 C363 119 348 115 350 107 Z"/>
+      <svg viewBox="0 40 720 276" role="img"
+           aria-label="A river between two banks: what models can do, and what people do easily. Three stepping stones cross it: reasoning, efficient learning, and world models. The third stone is still being laid.">
+        <defs>
+          <!-- 손으로 그린 듯한 떨림 -->
+          <filter id="gm-rough" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
+          </filter>
+        </defs>
+        <g filter="url(#gm-rough)">
+          <!-- 물 -->
+          <path class="gm-pool" d="M116 221 L604 221 L604 262 L116 262 Z"/>
+          <!-- 왼쪽 기슭 -->
+          <path class="gm-bank" d="M0 151 L22 149 L47 152 L70 149 L96 151 L117 150 L120 163 L114 178 L119 192 L113 207 L118 224 L115 243 L119 262 L0 262 Z"/>
+          <path class="gm-strata" d="M0 170 L20 172 L44 169 L70 173 L92 170 L115 173 M0 196 L26 194 L52 198 L80 195 L114 198 M0 224 L18 226 L46 223 L74 227 L116 224 M0 246 L30 244 L62 248 L90 245 L116 247"/>
+          <path class="gm-crack" d="M96 151 L92 160 L97 167 L93 176 M30 172 L34 181 L29 188 M62 198 L58 208 L64 215 L60 223 M100 199 L104 208 L99 214 M16 226 L21 236 L17 243"/>
+          <path class="gm-hatch" d="M100 178 l10 -7 M98 187 l13 -9 M101 208 l11 -8 M99 217 l12 -8 M102 236 l10 -7 M100 246 l12 -8 M8 180 l9 -6 M40 206 l10 -7 M72 182 l9 -6 M50 234 l10 -7 M20 252 l9 -6 M78 254 l9 -6"/>
+          <path class="gm-pebble" d="M22 160 q5 -4 10 0 q-5 4 -10 0 Z M60 184 q4 -3 8 0 q-4 3 -8 0 Z M80 210 q5 -4 11 0 q-6 4 -11 0 Z M34 216 q4 -3 9 0 q-5 3 -9 0 Z M66 238 q5 -3 10 0 q-5 4 -10 0 Z"/>
+          <path class="gm-grass" d="M10 149 l-3 -9 M12 149 l1 -11 M15 149 l4 -8 M40 151 l-3 -8 M42 151 l1 -10 M45 151 l4 -7 M74 149 l-2 -9 M77 149 l2 -10 M80 149 l5 -7 M104 150 l-2 -8 M107 150 l3 -9 M116 150 q6 2 7 10 M113 150 q8 -1 12 5"/>
+          <!-- 오른쪽 기슭 -->
+          <path class="gm-bank" d="M720 109 L698 107 L672 110 L648 107 L624 109 L603 108 L600 124 L606 142 L601 160 L607 180 L602 200 L606 222 L603 244 L605 262 L720 262 Z"/>
+          <path class="gm-strata" d="M720 130 L696 132 L668 129 L640 133 L606 130 M720 158 L690 156 L660 160 L632 157 L604 160 M720 188 L700 190 L670 187 L640 191 L606 188 M720 218 L694 216 L662 220 L634 217 L605 220 M720 244 L692 246 L664 243 L636 247 L606 245"/>
+          <path class="gm-crack" d="M624 109 L628 119 L623 127 L627 137 M690 132 L686 142 L691 150 M650 160 L654 171 L649 179 L653 187 M616 190 L612 200 L617 208 M704 190 L700 201 L705 209 L701 216 M668 220 L672 231 L667 240"/>
+          <path class="gm-hatch" d="M608 136 l11 -8 M609 148 l13 -9 M608 170 l11 -8 M610 182 l12 -9 M608 206 l11 -8 M609 232 l12 -9 M608 252 l11 -8 M660 142 l10 -7 M700 170 l10 -7 M636 204 l10 -7 M686 234 l10 -7 M640 254 l10 -7 M706 254 l9 -6"/>
+          <path class="gm-pebble" d="M640 118 q5 -4 10 0 q-5 4 -10 0 Z M694 144 q4 -3 9 0 q-5 3 -9 0 Z M664 172 q5 -4 11 0 q-6 4 -11 0 Z M626 232 q4 -3 9 0 q-5 3 -9 0 Z M690 204 q5 -4 10 0 q-5 4 -10 0 Z M654 232 q4 -3 8 0 q-4 3 -8 0 Z"/>
+          <path class="gm-grass" d="M630 108 l-3 -8 M632 108 l1 -10 M635 108 l4 -7 M660 108 l-3 -9 M662 108 l1 -11 M665 108 l4 -8 M680 109 l-2 -8 M683 109 l2 -10 M686 109 l5 -7 M708 107 l-3 -9 M711 107 l2 -10"/>
+          <!-- 디딤돌 셋: 돌마다 색이 조금 다르고, 마지막 돌은 아직 놓는 중이라 점선 -->
+          <g class="gm-stone" data-stone="reasoning">
+            <path class="gm-rock gm-rock-1" d="M170 222 L173 208 L181 199 L194 192 L212 189 L230 190 L246 195 L256 204 L261 222 Z"/>
+            <path class="gm-facet" d="M181 199 L196 203 L214 201 L230 190 M214 201 L218 221 M196 203 L190 221"/>
+            <path class="gm-shade" d="M236 204 l9 -6 M238 211 l12 -8 M240 218 l12 -8 M224 216 l7 -5"/>
+            <path class="gm-speck" d="M186 210 h.1 M201 212 h.1 M205 196 h.1 M222 208 h.1 M178 216 h.1"/>
+          </g>
+          <g class="gm-stone" data-stone="efficient-learning">
+            <path class="gm-rock gm-rock-2" d="M312 222 L309 206 L316 193 L329 184 L346 178 L368 176 L388 180 L402 189 L409 203 L407 222 Z"/>
+            <path class="gm-facet" d="M316 193 L334 198 L356 194 L368 176 M356 194 L372 202 L402 189 M372 202 L376 221 M334 198 L330 221"/>
+            <path class="gm-shade" d="M384 198 l10 -7 M386 206 l14 -10 M388 214 l14 -10 M378 216 l7 -5 M340 188 l7 -5"/>
+            <path class="gm-speck" d="M322 208 h.1 M344 208 h.1 M350 186 h.1 M362 212 h.1 M392 186 h.1 M318 216 h.1"/>
+            <path class="gm-moss" d="M330 184 q3 -5 6 -1 q3 -5 6 -1 q3 -4 6 0"/>
+          </g>
+          <g class="gm-stone gm-stone-next" data-stone="world-models">
+            <path class="gm-rock gm-rock-3" d="M458 222 L454 204 L459 186 L470 173 L486 164 L508 160 L528 163 L543 172 L553 187 L556 205 L553 222 Z"/>
+            <path class="gm-facet" d="M459 186 L480 190 L504 184 L508 160 M504 184 L524 194 L553 187 M524 194 L528 221 M480 190 L476 221"/>
+          </g>
+          <!-- 물결: 수면, 돌 주위의 잔물결, 깊은 물결 -->
+          <path class="gm-water" d="M120 221 q8 -3 16 0 t16 0 t16 0 M264 221 q8 -3 16 0 t16 0 t14 0 M412 221 q8 -3 16 0 t16 0 t12 0 M558 221 q8 -3 16 0 t16 0 t10 0"/>
+          <path class="gm-ripple" d="M162 224 q10 5 24 4 M246 228 q14 1 24 -4 M176 231 q34 6 74 0 M302 224 q10 5 24 4 M394 228 q14 1 24 -4 M318 231 q38 6 82 0 M448 224 q10 5 24 4 M540 228 q14 1 24 -4 M464 231 q38 6 84 0"/>
+          <path class="gm-water gm-deep" d="M128 238 q7 -4 14 0 t14 0 M196 243 q7 -4 14 0 t14 0 t14 0 M274 237 q7 -4 14 0 t14 0 M330 245 q7 -4 14 0 t14 0 t14 0 M420 238 q7 -4 14 0 t14 0 M486 244 q7 -4 14 0 t14 0 t14 0 M566 239 q7 -4 14 0 t14 0 M150 253 q7 -4 14 0 t14 0 M240 255 q7 -4 14 0 t14 0 t14 0 M372 256 q7 -4 14 0 t14 0 M446 254 q7 -4 14 0 t14 0 M540 255 q7 -4 14 0 t14 0 t14 0"/>
+          <path class="gm-glint" d="M286 229 h9 M300 233 h5 M432 230 h8 M148 230 h6 M580 230 h7 M222 249 h6 M404 249 h7 M520 250 h5"/>
+          <!-- 건너가는 길 -->
+          <path class="gm-route" d="M110 144 Q160 92 212 182 M220 182 Q290 96 356 168 M364 168 Q436 78 504 152 M512 152 Q562 52 612 96"/>
+          <path class="gm-arrow" d="M600 88 L613 97 L603 106"/>
+        </g>
         <!-- 이름표 -->
-        <text class="gm-side" x="41" y="84" text-anchor="middle">what models</text>
-        <text class="gm-side" x="41" y="100" text-anchor="middle">can do</text>
-        <text class="gm-side" x="483" y="44" text-anchor="middle">what people</text>
-        <text class="gm-side" x="483" y="60" text-anchor="middle">do easily</text>
-        <text class="gm-axis" x="150" y="185" text-anchor="middle">reasoning</text>
-        <a href="#logical-equivariance" data-card="logical-equivariance" data-stone="reasoning"><text class="gm-paper" x="150" y="200" text-anchor="middle">Logical Equivariance</text></a>
-        <text class="gm-axis" x="260" y="163" text-anchor="middle">efficient learning</text>
-        <a href="#pivot-sd" data-card="pivot-sd" data-stone="efficient-learning"><text class="gm-paper" x="259" y="178" text-anchor="end">Pivot-SD</text></a>
-        <text class="gm-paper gm-sep" x="259" y="178">,</text>
-        <a href="#klass" data-card="klass" data-stone="efficient-learning"><text class="gm-paper" x="265" y="178">KLASS</text></a>
-        <text class="gm-axis" x="380" y="141" text-anchor="middle">world models</text>
-        <a href="#nesp" data-card="nesp" data-stone="world-models"><text class="gm-paper" x="380" y="156" text-anchor="middle">next-event prediction</text></a>
+        <text class="gm-side" x="56" y="112" text-anchor="middle">what models</text>
+        <text class="gm-side" x="56" y="129" text-anchor="middle">can do</text>
+        <text class="gm-side" x="664" y="70" text-anchor="middle">what people</text>
+        <text class="gm-side" x="664" y="87" text-anchor="middle">do easily</text>
+        <g class="gm-label" data-stone="reasoning">
+          <text class="gm-axis" x="215" y="286" text-anchor="middle">reasoning</text>
+          <a href="#logical-equivariance" data-card="logical-equivariance"><text class="gm-paper" x="215" y="304" text-anchor="middle">Logical Equivariance</text></a>
+        </g>
+        <g class="gm-label" data-stone="efficient-learning">
+          <text class="gm-axis gm-axis-mid" x="360" y="286" text-anchor="middle">efficient learning</text>
+          <a href="#pivot-sd" data-card="pivot-sd"><text class="gm-paper" x="354" y="304" text-anchor="end">Pivot-SD</text></a>
+          <text class="gm-paper gm-sep" x="360" y="304" text-anchor="middle">·</text>
+          <a href="#klass" data-card="klass"><text class="gm-paper" x="366" y="304">KLASS</text></a>
+        </g>
+        <g class="gm-label" data-stone="world-models">
+          <text class="gm-axis" x="505" y="286" text-anchor="middle">world models</text>
+          <a href="#nesp" data-card="nesp"><text class="gm-paper" x="505" y="304" text-anchor="middle">next-event prediction</text></a>
+        </g>
       </svg>
-      <figcaption>Two stones are in place. The third is the one I am laying now.</figcaption>
+      <!-- 돌에 마우스를 올리면(또는 누르면) 안내 문구 자리에 그 돌의 질문이 나타납니다 -->
+      <div class="gap-notes">
+        <p class="gap-hint">Hover or tap a stone to read its question.</p>
+      <div class="gap-note" data-stone="reasoning">
+        <p class="gs-q">Where does pattern matching end and reasoning begin?</p>
+        <p class="gs-a">Pattern matching is right near what a model has seen. Reasoning is using the
+          structure underneath to be right where it has never been.</p>
+        <p class="gs-tags">So far: <a href="#logical-equivariance">Logical Equivariance</a></p>
+      </div>
+      <div class="gap-note" data-stone="efficient-learning">
+        <p class="gs-q">Why do models need so much more than people do?</p>
+        <p class="gs-a">Scale works, but every gain asks for more data than the last. People learn a new
+          skill from a handful of examples; models have to learn more from less.</p>
+        <p class="gs-tags">So far: <a href="#pivot-sd">Pivot-SD</a> · <a href="#klass">KLASS</a></p>
+      </div>
+      <div class="gap-note" data-stone="world-models">
+        <p class="gs-q">Can a model keep up with a world that does not wait?</p>
+        <p class="gs-a">The physical world keeps moving while a model computes. Acting in it takes a model
+          that predicts what its own actions will cause, skips the details that do not matter, and corrects
+          itself when it is wrong.</p>
+        <p class="gs-tags">In progress: <a href="#nesp">Next-event prediction</a></p>
+      </div>
+      </div>
     </figure>
     <p class="gap-invite">If you are working on one of these gaps, or want to, I would be glad to talk:
       <a href="mailto:sunwoo@kaist.ac.kr">sunwoo@kaist.ac.kr</a></p>
@@ -371,14 +438,38 @@
 })();
 </script>
 
-<!-- 간극의 디딤돌: 논문 이름에 마우스를 올리거나 키보드로 고르면 그 돌이 살짝 떠오르고 위쪽 논문 카드도 표시됩니다 -->
+<!-- 간극의 디딤돌: 돌(또는 그 이름표)에 마우스를 올리거나 누르면 그 돌의 질문이 뜨고,
+     논문 이름에 올리면 위쪽 카드도 표시됩니다 -->
 <script>
 (function () {
-  document.querySelectorAll('.gap-map a[data-card]').forEach(function (link) {
-    var card = document.getElementById(link.dataset.card);
-    var stone = document.querySelector('.gm-stone[data-stone="' + link.dataset.stone + '"]');
-    function on() { if (card) card.classList.add('is-pointed'); if (stone) stone.classList.add('is-lit'); }
-    function off() { if (card) card.classList.remove('is-pointed'); if (stone) stone.classList.remove('is-lit'); }
+  var map = document.querySelector('.gap-map');
+  if (!map) return;
+  function parts(name) { return map.querySelectorAll('[data-stone="' + name + '"]'); }
+  var notes = map.querySelector('.gap-notes');
+  /* 설명이 하나라도 보이는 동안에는 안내 문구를 숨깁니다 */
+  function sync() { if (notes) notes.classList.toggle('has-active', !!notes.querySelector('.is-lit, .is-open')); }
+  function set(name, cls, on) { parts(name).forEach(function (el) { el.classList.toggle(cls, on); }); sync(); }
+  var triggers = map.querySelectorAll('.gm-stone[data-stone], .gm-label[data-stone]');
+  triggers.forEach(function (el) {
+    var name = el.getAttribute('data-stone');
+    el.addEventListener('mouseenter', function () { set(name, 'is-lit', true); });
+    el.addEventListener('mouseleave', function () { set(name, 'is-lit', false); });
+    el.addEventListener('focusin', function () { set(name, 'is-lit', true); });
+    el.addEventListener('focusout', function () { set(name, 'is-lit', false); });
+    /* 누르면 고정, 다시 누르면 닫힘 (터치 화면용). 논문 링크를 누를 때는 건드리지 않습니다. */
+    el.addEventListener('click', function (event) {
+      if (event.target.closest && event.target.closest('a')) return;
+      var open = !el.classList.contains('is-open');
+      map.querySelectorAll('.is-open').forEach(function (other) { other.classList.remove('is-open'); });
+      set(name, 'is-open', open);
+      sync();
+    });
+  });
+  map.querySelectorAll('a[data-card]').forEach(function (link) {
+    var card = document.getElementById(link.getAttribute('data-card'));
+    if (!card) return;
+    function on() { card.classList.add('is-pointed'); }
+    function off() { card.classList.remove('is-pointed'); }
     link.addEventListener('mouseenter', on); link.addEventListener('mouseleave', off);
     link.addEventListener('focus', on); link.addEventListener('blur', off);
   });
