@@ -126,10 +126,9 @@ h1.name, h1.page-title {
   letter-spacing: -.6px; color: var(--ink);
   margin: 0 0 10px;
 }
-.role { margin: 0 0 18px; font-size: 1.08rem; color: var(--body); }
-/* 한 문장 비전: 이름 다음으로 큰 글씨 */
-.tagline { font-size: 1.2rem; font-weight: 600; line-height: 1.4; color: var(--ink);
-           margin: 0 0 22px; max-width: 24em; text-wrap: balance; }
+.role { margin: 0 0 24px; font-size: 1.08rem; color: var(--body); }
+/* 한 문장 비전: 본문보다 한 단계 크게 */
+.top-bio .vision { font-size: 1.24rem; line-height: 1.45; color: var(--ink); margin: 20px 0; }
 
 .portrait {
   width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block;
@@ -308,8 +307,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     grid-template-areas: "head" "side" "bio";
     padding-top: 40px;
   }
-  .role { margin-bottom: 14px; }
-  .tagline { margin-bottom: 20px; }
+  .role { margin-bottom: 20px; }
   .top-side { margin-bottom: 22px; }
   .portrait { max-width: 220px; }
   .nav-links { gap: 14px; }
