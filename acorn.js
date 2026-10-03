@@ -481,8 +481,7 @@
   }
 
   async function visit() {
-    writeStore('localStorage', NUDGE_KEY, '1');
-    endNudge();
+    stopNudging();
     if (busy) { if (kind === 'visit') growImpatient(); return; }
     const returning = away;
     const result = await perform('visit', function (g, signal) {
@@ -1012,15 +1011,26 @@
     });
   }
 
-  /* ---------------- A first-visit nudge ----------------
-     Once per browser, a few seconds after the first page opens, the squirrel hangs
-     upside down from under the menu right below the acorn, eyes it, the acorn
-     wobbles, and the squirrel slips back up. Skipped with reduced motion, while
-     the acorn is away, and once anyone has pressed the acorn. */
-  const NUDGE_KEY = 'sunwoo.squirrel.nudged.v1';
-  const HANG_ART = ART.replace(/sqp-/g, 'sqhp-').replace(/sq-clip-/g, 'sqh-clip-').replace('${held}', '');
+  /* ---------------- A nudge toward the acorn ----------------
+     On every visit (browser tab session) until the acorn is pressed: the squirrel
+     hangs upside down from under the menu right below the acorn, eyes it, the
+     acorn wobbles, and the squirrel slips back up. At most three times a visit,
+     about 3 s after the page opens, then 10 s and 20 s after the previous one.
+     It waits while the visitor is scrolling or away from the tab, and stops for
+     the rest of the visit once the acorn is pressed. Skipped with reduced motion. */
+  const NUDGE_COUNT_KEY = 'sunwoo.squirrel.nudges.v1';   // sessionStorage: nudges shown this visit
+  const NUDGE_DONE_KEY = 'sunwoo.squirrel.nudge-done.v1'; // sessionStorage: acorn pressed this visit
+  const NUDGE_GAPS = [3000, 10000, 20000];
+  const NUDGE_LENGTH = 2950;
+  const HANG_ART = ART.replace(/sqp-/g, 'sqhp-').replace(/sq-clip-/g, 'sqh-clip-');
   let hang = null;
   let nudgeTimers = [];
+  let nudgeWait = 0;
+  let lastScroll = 0;
+  window.addEventListener('scroll', function () { lastScroll = Date.now(); }, { passive: true });
+
+  function nudgesShown() { return parseInt(readStore('sessionStorage', NUDGE_COUNT_KEY) || '0', 10) || 0; }
+  function nudgesDone() { return readStore('sessionStorage', NUDGE_DONE_KEY) === '1' || motionPreference.matches; }
 
   function endNudge() {
     nudgeTimers.forEach(clearTimeout);
@@ -1029,10 +1039,32 @@
     if (hang) { hang.remove(); hang = null; }
   }
 
-  function nudge() {
-    if (readStore('localStorage', NUDGE_KEY) || busy || away || document.hidden ||
-        motionPreference.matches || tripCount() > 0) return;
-    writeStore('localStorage', NUDGE_KEY, '1');
+  function stopNudging() {
+    writeStore('sessionStorage', NUDGE_DONE_KEY, '1');
+    clearTimeout(nudgeWait);
+    endNudge();
+  }
+
+  function scheduleNudge() {
+    clearTimeout(nudgeWait);
+    const shown = nudgesShown();
+    if (nudgesDone() || shown >= NUDGE_GAPS.length) return;
+    nudgeWait = setTimeout(tryNudge, NUDGE_GAPS[shown]);
+  }
+
+  // Only in a quiet moment: not while scrolling, in another tab, or mid-scene.
+  function tryNudge() {
+    if (nudgesDone()) return;
+    if (document.hidden || busy || away || fortuneOpen || hang || Date.now() - lastScroll < 2000) {
+      nudgeWait = setTimeout(tryNudge, 1000);
+      return;
+    }
+    writeStore('sessionStorage', NUDGE_COUNT_KEY, String(nudgesShown() + 1));
+    showNudge();
+    nudgeWait = setTimeout(scheduleNudge, NUDGE_LENGTH);
+  }
+
+  function showNudge() {
     const rect = sourceIcon.getBoundingClientRect();
     const width = document.documentElement.clientWidth <= 700 ? 78 : 88;
     const s = width / 128;
@@ -1051,7 +1083,7 @@
       '<g filter="url(#sqh-rough)">' + HANG_ART + '</g></svg></div>';
     document.body.appendChild(hang);
     nudgeTimers.push(setTimeout(function () { button.classList.add('is-nudged'); }, 1150));
-    nudgeTimers.push(setTimeout(endNudge, 2950));
+    nudgeTimers.push(setTimeout(endNudge, NUDGE_LENGTH));
   }
 
   /* ---------------- Keyboard and shakes ---------------- */
@@ -1146,5 +1178,5 @@
   syncButton();
   renderOak();
   button.hidden = false;
-  setTimeout(nudge, 3200);
+  scheduleNudge();
 })();
