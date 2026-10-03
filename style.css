@@ -141,6 +141,9 @@ h1.name, h1.page-title {
 .contact p { margin: 0; }
 .contact .links { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 2px 14px; }
 
+/* the paper card a stepping stone points at */
+.pub.is-pointed { border-color: var(--acorn); box-shadow: 0 14px 30px -22px var(--shadow); }
+
 /* ================= SECTIONS ================= */
 section { padding: 30px 0; }
 h2 {
@@ -221,6 +224,51 @@ h2 a { font-family: var(--sans); font-size: .9rem; font-weight: 400; letter-spac
 .plist .pub-venue { margin-bottom: 6px; }
 .plist .tag { font-style: normal; font-weight: 600; color: var(--leaf); }
 
+/* ================= GET IN TOUCH: crossing the gap (index.html) =================
+   "Close the gap", drawn in the same pencil manner as the squirrel: two banks,
+   stepping stones in between. Labels sit in five equal columns that line up with
+   the drawing at any width. */
+.gap { margin: 6px 0 0; }
+.gap-scene { display: block; width: 100%; height: auto; overflow: visible; }
+.gap-ink, .gap-hatch, .gap-water, .gap-grass {
+  fill: none; stroke-linecap: round; stroke-linejoin: round;
+}
+.gap-ink { stroke: var(--ink); stroke-width: 1.8; }
+.gap-ink.dashed { stroke: var(--acorn); stroke-dasharray: 6 5; stroke-width: 1.8; }
+.gap-hatch { stroke: var(--ink); stroke-width: 1; opacity: .35; }
+.gap-water { stroke: var(--muted); stroke-width: 1.4; opacity: .7; }
+.gap-water.faint { opacity: .35; }
+.gap-grass { stroke: var(--leaf); stroke-width: 1.3; }
+.gap-earth { fill: var(--acorn); opacity: .16; }
+.gap-rock { fill: var(--line-strong); opacity: .75; }
+.gap-stone { transition: transform .2s ease; transform-box: fill-box; transform-origin: 50% 100%; }
+.gap-stone.is-lit { transform: translateY(-4px); }
+.gap-stone.is-lit .gap-ink { stroke: var(--acorn); }
+
+.gap-labels {
+  list-style: none; margin: 4px 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); column-gap: 8px;
+  text-align: center;
+}
+.gap-bank {
+  font-family: var(--serif); font-style: italic; font-size: 1rem; line-height: 1.3; color: var(--ink);
+  padding-top: 2px;
+}
+.gap-word {
+  display: block; font-family: var(--serif); font-weight: 600; font-size: 1.02rem; line-height: 1.3; color: var(--ink);
+}
+.gap-step[data-stone="world-models"] .gap-word { color: var(--acorn); }
+.gap-papers { display: block; font-size: .84rem; line-height: 1.4; color: var(--muted); }
+.gap figcaption { margin: 14px 0 0; font-size: .9rem; color: var(--muted); text-align: center; }
+.gap-invite { margin: 22px 0 0; }
+@media (max-width: 700px) {
+  /* On a phone the stones keep their one-word names; the papers are just above. */
+  .gap-labels { column-gap: 2px; }
+  .gap-bank { font-size: .8rem; }
+  .gap-word { font-size: .84rem; }
+  .gap-papers { display: none; }
+}
+
 /* ================= FOOTER ================= */
 footer {
   border-top: 1px solid var(--line); margin-top: 28px;
@@ -246,7 +294,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .pub, a { transition: none; }
+  .pub, a, .gap-stone { transition: none; }
   .pub:hover { transform: none; }
 }
 
