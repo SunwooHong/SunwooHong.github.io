@@ -1,34 +1,50 @@
 /*
- * Deluxe secret-door squirrel for the top navigation.
- * Click the acorn once: the squirrel sneaks out and steals it.
- * Click again: it sneaks back and politely returns it.
- * Bonus: drag the acorn and the squirrel will chase it.
+ * A little squirrel, an acorn, and a round trip, drawn in pen and wash.
+ * Dependency-free; works on a static site and with local HTML files.
+ * Click once to lend the acorn. Click again to have it returned.
+ *
+ * It also answers to a few other things. They are listed in README_KO.md,
+ * and hinted at (vaguely) in the browser console.
  */
 (function () {
   'use strict';
 
   const button = document.getElementById('acorn-toggle');
   const nav = document.querySelector('.nav');
-  const mark = document.querySelector('.mark');
-  if (!button || !nav || !mark || button.dataset.squirrelReady === 'true') return;
+  if (!button || !nav || button.dataset.squirrelReady === 'true') return;
   button.dataset.squirrelReady = 'true';
 
-  const STORAGE_KEY = 'sunwoo.squirrel.deluxe.v3';
+  const STORAGE_KEY = 'sunwoo.squirrel.acorn.v1';   // sessionStorage: where the acorn is
+  const TRIPS_KEY = 'sunwoo.squirrel.trips.v1';     // localStorage: finished round trips
+  const OAK_SEEN_KEY = 'sunwoo.squirrel.oak.v1';    // localStorage: last oak stage shown growing
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let away = false;
-  try { away = sessionStorage.getItem(STORAGE_KEY) === 'away'; } catch (_) {}
 
+  function readStore(kind, key) {
+    try { return window[kind].getItem(key); } catch (_) { return null; }
+  }
+  function writeStore(kind, key, value) {
+    try { window[kind].setItem(key, value); } catch (_) {}
+  }
+
+  // Seasonal and late-night moods. ?squirrel=winter,night forces them for testing.
+  const forced = (new URLSearchParams(window.location.search).get('squirrel') || '').split(',');
+  const now = new Date();
+  const isWinter = forced.indexOf('winter') >= 0 || [11, 0, 1].indexOf(now.getMonth()) >= 0;
+  const isNight = forced.indexOf('night') >= 0 || now.getHours() >= 23 || now.getHours() < 5;
+
+  let away = readStore('sessionStorage', STORAGE_KEY) === 'away';
   let busy = false;
+  let kind = '';
   let activeController = null;
   let direction = 1;
   let position = { x: 0, y: 0 };
-  let mouse = { x: -10000, y: -10000 };
+  let spin = 0;
+  let tempo = 1;
+  let impatience = 0;
+  let startleTimer = 0;
   let scale = 88 / 128;
   let spriteWidth = 88;
   let spriteHeight = 71.5;
-  let suppressNextClick = false;
-  let transferKind = 'acorn';
-  let pointerState = null;
 
   const status = document.createElement('span');
   status.className = 'squirrel-status';
@@ -37,122 +53,86 @@
   status.setAttribute('aria-atomic', 'true');
   document.body.appendChild(status);
 
+  // Reuse the actual navigation icon, so the acorn in its paws is identical.
   const sourceIcon = button.querySelector('.acorn-icon');
   const acornDrawing = sourceIcon.innerHTML;
+  const held = '<svg class="sq-held-icon" x="88" y="51" width="28" height="28" viewBox="0 0 24 24" ' +
+    'fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" ' +
+    'stroke-linejoin="round">' + acornDrawing + '</svg>';
+
+  // Three slightly different wobbles. Cycling them while the squirrel moves gives
+  // the "boiling" line of hand-drawn animation; at rest it keeps the first one.
+  const roughness = [3, 11, 23].map(function (seed, i) {
+    return '<filter id="sq-rough-' + i + '" x="-8%" y="-12%" width="116%" height="124%" ' +
+      'color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency=".085" ' +
+      'numOctaves="2" seed="' + seed + '"/><feDisplacementMap in="SourceGraphic" scale="2.2" ' +
+      'xChannelSelector="R" yChannelSelector="G"/></filter>';
+  }).join('');
+
   const stage = document.createElement('div');
   stage.className = 'squirrel-stage';
   stage.hidden = true;
   stage.setAttribute('aria-hidden', 'true');
+  // The drawing below is pre-generated: ink contours, hatching, fur strokes and
+  // an offset wash, all in the page's own colour tokens.
   stage.innerHTML = `
-    <div class="squirrel-burrow" hidden>
-      <div class="burrow-shadow"></div>
-      <div class="burrow-hole"></div>
-      <div class="burrow-door"><span class="burrow-knob"></span></div>
+  <div class="squirrel-actor">
+    <div class="squirrel-facing">
+      <svg class="squirrel-art" viewBox="0 0 128 104" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>${roughness}</defs>
+      <g class="sq-figure" filter="url(#sq-rough-0)">
+      <defs><clipPath id="sq-clip-tail"><path d="M51 80C33 87 10 78 7 59C4 43 17 34 21 26C26 16 22 9 16 12C12 14 12 19 15 22C4 21 3 11 10 6C22-4 42 9 45 26C49 44 31 51 32 63C33 70 41 73 51 72Z"/></clipPath><clipPath id="sq-clip-body"><path d="M73 52C62 50 48 58 45 72C43 82 46 92 55 95C64 97 76 96 81 90C86 82 86 70 82 62C80 57 77 54 73 52Z"/></clipPath><clipPath id="sq-clip-hind"><path d="M47 84C45 73 54 67 62 70C69 73 70 84 64 90C68 92 71 93 72 94C75 95 75 98 72 98.5L52 98.5C47 98.5 45 95 48 92.5C47 90 47 87 47 84Z"/></clipPath><clipPath id="sq-clip-hindfar"><path d="M50 88C46 92 41 95 37 96C34 97 34 99.5 37 99.5L50 99.5C53 99.5 55 96.5 55 93Z"/></clipPath><clipPath id="sq-clip-frontfar"><path d="M81 73C83 80 86 87 89 91.5L94 92C97 92.3 97 95.5 94 95.6L87.5 95.6C85.4 95.6 84.4 94.5 84 93C82 88 80 82 79 76Z"/></clipPath><clipPath id="sq-clip-earfar"><path d="M75.5 37C72.5 31 72.6 23 75.8 17.5C78.6 21 80.6 27 80.8 33Z"/></clipPath></defs>
+      <path class="sq-ground" d="M37 100.4c12-.7 35-.9 55-.1M46 102.2c8-.4 21-.4 31 .1"/>
+      <g class="sq-tail"><path class="sq-paper" d="M51 80C33 87 10 78 7 59C4 43 17 34 21 26C26 16 22 9 16 12C12 14 12 19 15 22C4 21 3 11 10 6C22-4 42 9 45 26C49 44 31 51 32 63C33 70 41 73 51 72Z"/><path class="sq-wash" transform="translate(1.8 1.6)" d="M51 80C33 87 10 78 7 59C4 43 17 34 21 26C26 16 22 9 16 12C12 14 12 19 15 22C4 21 3 11 10 6C22-4 42 9 45 26C49 44 31 51 32 63C33 70 41 73 51 72Z"/><path class="sq-hatch" clip-path="url(#sq-clip-tail)" d="M28.1 56.6L33.9 65.9M24.9 55.8L33.4 69.4M21.4 54.5L31.9 71.4M18.5 54.2L30 72.7M15.9 54.4L28.7 75M14 55.7L26.2 75.3M11.5 56.1L24.4 76.7M9.3 56.9L21.9 77M7.5 58.4L19.5 77.5M6 60.2L16.6 77.3M5.1 63.2L13.5 76.7M4.3 66.2L9.7 74.8M34.7 48.3L38.1 53.7M32.5 49.7L38.9 59.9M30.5 51.4L38.4 64.1M30.1 55.7L37.4 67.3M29.1 59L36.2 70.2M29.8 64.9L33.8 71.3"/><path class="sq-fine sq-faint" d="M44 76.5C27 75 18 65 20 55C23 41 38 35 35 21C33 14 27 10 22 11"/><path class="sq-line sq-broken" d="M51 80C33 87 10 78 7 59C4 43 17 34 21 26C26 16 22 9 16 12C12 14 12 19 15 22C4 21 3 11 10 6C22-4 42 9 45 26C49 44 31 51 32 63C33 70 41 73 51 72Z"/><path class="sq-fur" d="M33.5 80.5Q33 84.1 29.8 83.4M32.1 80.3Q32 81.6 30.1 81M27.7 79.2Q26.4 83.2 22.5 81.6M22.1 76.8Q20.1 80.6 16.5 78.3M20.9 76.2Q20.1 77.6 18.2 76.2M15.2 71.7Q12.5 74.3 10.4 71.7M14.2 70.7Q13.2 71.6 12.1 70M10.8 65.6Q7 67.4 5.6 63.6M10.1 64.3Q8.6 65.1 7.8 62.7M8.3 56.4Q4.3 56.7 4.3 52.9M8.1 55Q6.4 55.2 6.5 52.5M8.8 49.1Q5.4 48.2 6.4 45.3M9.1 47.7Q8.1 47.4 8.7 45.9M11.3 42.7Q8.2 41 9.9 38.4M12 41.5Q10.7 40.7 12 38.9M15.7 36.2Q12.2 33.5 15.2 30.1M19 31.9Q15.9 29.5 18.4 26.7M22.2 27.2Q18.8 25.5 20.6 22.6M24.4 21.4Q20.6 20.6 21.7 17.1M7.3 12.7Q3 11.8 2.4 16.2M9.8 8.3Q7.2 5.4 4.8 8M15.7 4.7Q14.7 1.1 11.5 2.2M14.4 5.1Q14 3.6 11.9 4.5M22.3 4.3Q22.9 1.1 20.2 0.8M27.7 6Q29.1 3 26.6 2.1M33.4 9.6Q35.9 6.6 32.9 4.4M32.3 8.7Q33.6 7.2 31.2 5.7M37.5 13.7Q40.2 11.6 38.2 9.4M36.6 12.6Q37.6 11.9 36.3 10.6M41 19Q44.2 17.4 42.6 14.6"/><path class="sq-ghost" d="M50 81.6C32.4 88.2 9.2 79 6 59.4C3.4 43.6 15.8 35 20.2 26.4M10.6 5C22.6-5.2 43.4 8.2 46.2 25.6"/></g>
+      <g class="sq-hind-far"><path class="sq-paper" d="M50 88C46 92 41 95 37 96C34 97 34 99.5 37 99.5L50 99.5C53 99.5 55 96.5 55 93Z"/><path class="sq-hatch sq-dense" clip-path="url(#sq-clip-hindfar)" d="M52 92.3L54.9 96.5M49.8 92.1L54 98M47.7 91.9L52.3 98.5M45.6 91.6L51.5 100M43.5 91.5L49.7 100.3M41.7 91.7L47.8 100.3M40.3 92.4L46.1 100.7M38.8 93L44 100.6M37.2 93.5L41.8 100.1M35.3 93.7L40 100.4M34.8 95.7L37 98.9"/><path class="sq-line" d="M50 88C46 92 41 95 37 96C34 97 34 99.5 37 99.5L50 99.5C53 99.5 55 96.5 55 93Z"/></g>
+      <g class="sq-front-far"><path class="sq-paper" d="M81 73C83 80 86 87 89 91.5L94 92C97 92.3 97 95.5 94 95.6L87.5 95.6C85.4 95.6 84.4 94.5 84 93C82 88 80 82 79 76Z"/><path class="sq-hatch sq-dense" clip-path="url(#sq-clip-frontfar)" d="M91.5 83.9L95.7 89.9M89 83.1L95.4 92.3M87.3 83.4L94.2 93.3M85.7 83.9L93.1 94.5M84.2 84.6L92 95.7M82.7 85.2L90 95.7M81.6 86.4L88.7 96.6M81 88.4L86.9 96.8M80.4 90.3L84.3 95.9"/><path class="sq-line" d="M81 73C83 80 86 87 89 91.5L94 92C97 92.3 97 95.5 94 95.6L87.5 95.6C85.4 95.6 84.4 94.5 84 93C82 88 80 82 79 76Z"/></g>
+      <g class="sq-body"><path class="sq-paper" d="M73 52C62 50 48 58 45 72C43 82 46 92 55 95C64 97 76 96 81 90C86 82 86 70 82 62C80 57 77 54 73 52Z"/><path class="sq-wash" transform="translate(1.6 1.2)" d="M73 52C62 50 48 58 45 72C43 82 46 92 55 95C62 96 68 94 70 88C72 80 72 70 78 60Z"/><path class="sq-hatch" clip-path="url(#sq-clip-body)" d="M52.5 77.8L56.4 83.2M49.7 77.6L56.3 87M47.2 77.8L55.6 89.9M45.5 79.2L54.6 92.2M44.5 81.6L52.6 93.2M43.7 84.3L50.8 94.4M43.4 87.8L47.8 94.1"/><path class="sq-line" d="M74.5 53.2C63 49.6 48.4 57 45.2 71.6C43.2 82 46.2 92 55 95.1"/><path class="sq-line" d="M55 95.1C64 97.2 76 96 81.2 89.6M82.6 61.2C86.4 69 86.6 81.6 81.8 90.2"/><path class="sq-fur" d="M65.2 53Q64.8 51.2 63.3 51.7M56.3 56.7Q55.3 55.3 54.1 56.3M49.2 64Q47.5 62.9 46.6 64.7M46 71.4Q44.1 71 43.9 72.8"/><path class="sq-fine sq-faint" d="M79.4 60.6C75.4 68.4 74.4 80 73.4 90"/><path class="sq-ghost" d="M75.6 52.2C63.4 48.4 47.6 56 44.2 71"/></g>
+      <g class="sq-hind-near"><path class="sq-paper" d="M47 84C45 73 54 67 62 70C69 73 70 84 64 90C68 92 71 93 72 94C75 95 75 98 72 98.5L52 98.5C47 98.5 45 95 48 92.5C47 90 47 87 47 84Z"/><path class="sq-wash" transform="translate(1.4 1.2)" d="M47 84C45 73 54 67 62 70C66 72 66.4 78 62.6 82.4C58.6 86.6 52 88 47 84Z"/><path class="sq-hatch" clip-path="url(#sq-clip-hind)" d="M55.7 86.8L58.2 90.3M53.3 86.9L56.7 91.8M50.4 86.5L55.2 93.4M48.6 87.6L53 93.8M46.6 88.3L49.8 93M45.4 90.3L46.6 92.1"/><path class="sq-line" d="M47.2 86C45 74 54 67 62 70C69 73 70.5 83 64.5 90"/><path class="sq-line" d="M58.6 91.2C63.6 92 68 93 72 94C75 95 75 98 72 98.5L52 98.5C48 98.6 45.8 96 48.5 93"/><path class="sq-fine" d="M66.2 98.4l.6-2M69.6 98.4l.3-2"/></g>
+      <g class="sq-front-near"><path class="sq-paper" d="M76 73C77 81 80 89 84 94.5L90 95.2C93.5 95.6 93.4 99 90 99L82.5 99C79.8 99 78.7 97.2 78 95C75 88 72.5 81 72.5 75Z"/><path class="sq-line" d="M76 73.5C77 81 80 89 84 94.6L90 95.2C93.5 95.6 93.4 99 90 99L82.5 99C79.8 99 78.7 97.2 78 95C75.6 89 73.6 83 72.8 77.4"/><path class="sq-fine" d="M86.4 98.9l.4-1.8M88.9 98.9l.2-1.8"/></g>
+      <g class="sq-scarf sq-scarf-end"><path class="sq-paper" d="M76 58C70.4 60.4 65.4 64.6 62.4 70.6L66.8 71.8C69.2 66.8 72.8 63.6 78.4 61.4Z"/><path class="sq-scarf-wash" d="M76 58C70.4 60.4 65.4 64.6 62.4 70.6L66.8 71.8C69.2 66.8 72.8 63.6 78.4 61.4Z"/><path class="sq-line sq-thin" d="M76 58C70.4 60.4 65.4 64.6 62.4 70.6L66.8 71.8C69.2 66.8 72.8 63.6 78.4 61.4M62.8 71l-1.3 2.4M64.8 71.5l-.8 2.6M66.6 71.9l-.3 2.6"/></g>
+      <g class="sq-head"><path class="sq-paper" d="M75.5 37C72.5 31 72.6 23 75.8 17.5C78.6 21 80.6 27 80.8 33Z"/><path class="sq-hatch sq-dense" clip-path="url(#sq-clip-earfar)" d="M76.2 17.3L80.6 23.7M75.2 18.8L80.4 26.3M74.6 21L80.6 29.5M73.6 22.4L80.1 31.8M73.5 25.3L79.7 34.2M73.2 27.8L78.7 35.7M73.6 31.4L77.1 36.4"/><path class="sq-line" d="M75.5 37C72.5 31 72.6 23 75.8 17.5C78.6 21 80.6 27 80.8 33Z"/><path class="sq-paper" d="M72 41C73.5 33 81 28.5 89.5 29.5C96 30.4 100.5 35 103 40.5C105.6 43.6 109.6 46 112.2 49.2C113.6 52.6 110.8 55.8 106.6 57C102.4 59.2 98.2 61 93 62C86 63 79 61.2 75 56.4C71.4 52 70.7 46 72 41Z"/><path class="sq-wash" transform="translate(1.4 1.2)" d="M72 41C73.5 33 81 28.5 89.5 29.5C96 30.4 100.5 35 103 40.5C99 41.4 95 37.6 88.6 38.6C82.4 39.8 78.6 46 79.4 53.6C77.4 56.6 74 55.6 72 50Z"/><path class="sq-line" d="M73.2 38.6C75.6 32.4 81.6 28.6 89.5 29.5C96 30.4 100.5 35 103 40.5C105.6 43.6 109.6 46 112.2 49.2C113.6 52.6 110.8 55.8 106.6 57C102.4 59.2 98.2 61 93 62"/><path class="sq-fine" d="M75.3 56.6C72.6 53.6 71.4 50 71.6 46.4M75 55.6l-3.4 2.2M72.4 51.4l-3.6.8M72 47l-3-.6"/><path class="sq-ghost" d="M73.8 37.6C76.6 31.8 82 28 89.6 28.7C95.6 29.5 100.4 33.8 103 39.4"/><path class="sq-paper" d="M81 34C79.5 26 81.2 18.8 85.4 13.2C88.8 18.6 90.4 25.4 89.6 32.6Z"/><path class="sq-wash" transform="translate(1 0.8)" d="M81 34C79.5 26 81.2 18.8 85.4 13.2C88.8 18.6 90.4 25.4 89.6 32.6Z"/><path class="sq-line" d="M81 34C79.5 26 81.2 18.8 85.4 13.2C88.8 18.6 90.4 25.4 89.6 32.6Z"/><path class="sq-fine" d="M84 30.5C84 25 84.6 21 85.6 17.5"/><path class="sq-fur" d="M85.4 13.6C85 10.6 85.8 8.2 87.6 6.6M85.6 13.4C86.8 11.2 88.4 10.2 90.2 9.8"/><path class="sq-fine sq-faint" d="M89 44.6C89.8 47 92.2 48.2 94.8 47.6"/>
+      <g class="sq-eye"><ellipse cx="93" cy="42.6" rx="2.5" ry="2.9" class="sq-ink-fill sq-feature"/><circle cx="93.8" cy="41.6" r=".8" class="sq-glint"/></g><path class="sq-ink-fill sq-feature" d="M109.3 48.6C111.2 47.9 113 48.8 112.6 50.8C111.6 52 109.8 51.2 109.3 48.6Z"/><path class="sq-fine sq-mouth" d="M106.6 55.4C104.8 56.8 102.6 57 100.8 56.2"/><path class="sq-ink-fill sq-feature sq-yawn" d="M100.6 55.4C102.4 60.4 107.2 60.8 108.4 56.6C106 57.6 103 57.2 100.6 55.4Z"/><path class="sq-whisker" d="M108.5 52.5C113 51.4 117.5 51 122 51.6M108.4 53.6C112.6 54.4 116.6 56 120.4 58.4"/></g>
+      <g class="sq-scarf"><path class="sq-paper" d="M72.6 52.6C77.4 58.2 84.6 60.4 90.6 58.4L90 63.4C83.4 65.6 75.6 63.2 71 57.2Z"/><path class="sq-scarf-wash" d="M72.6 52.6C77.4 58.2 84.6 60.4 90.6 58.4L90 63.4C83.4 65.6 75.6 63.2 71 57.2Z"/><path class="sq-line sq-thin" d="M72.6 52.6C77.4 58.2 84.6 60.4 90.6 58.4L90 63.4C83.4 65.6 75.6 63.2 71 57.2Z"/><path class="sq-fine" d="M77 56.8l-1 4.6M81.8 59l-.6 4.6M86.4 59.8l-.2 4.4"/></g>
+      <g class="sq-arm"><path class="sq-paper" d="M78.5 62.5C81.5 67.5 86.5 70.8 92 71C95.2 71.2 95.8 74.6 92.8 75.4C87.4 76.6 81.6 73.6 77.4 69Z"/><path class="sq-wash" transform="translate(0.8 0.8)" d="M78.5 62.5C81.5 67.5 86.5 70.8 92 71C95.2 71.2 95.8 74.6 92.8 75.4C87.4 76.6 81.6 73.6 77.4 69Z"/><path class="sq-line" d="M78.5 62.5C81.5 67.5 86.5 70.8 92 71C95.2 71.2 95.8 74.6 92.8 75.4C87.4 76.6 81.6 73.6 77.4 69Z"/><path class="sq-fine" d="M92.6 75.3l.3-1.7"/></g>
+      <g class="sq-reach"><path class="sq-paper" d="M78 65.6C87 64.6 98 62 104.6 57C108 53.6 108.2 46 107.8 38.6C107.6 33 107.4 28.8 107.6 25.4C107.9 21.9 111.5 21.3 112.4 23.8C112.9 25.6 112.5 28.4 112.3 31.4C112 38.4 113 47.6 110.8 56C108.4 63.6 97 69.4 84 70.8Z"/><path class="sq-wash" transform="translate(0.8 0.8)" d="M78 65.6C87 64.6 98 62 104.6 57C108 53.6 108.2 46 107.8 38.6C107.6 33 107.4 28.8 107.6 25.4C107.9 21.9 111.5 21.3 112.4 23.8C112.9 25.6 112.5 28.4 112.3 31.4C112 38.4 113 47.6 110.8 56C108.4 63.6 97 69.4 84 70.8Z"/><path class="sq-line" d="M78 65.6C87 64.6 98 62 104.6 57C108 53.6 108.2 46 107.8 38.6C107.6 33 107.4 28.8 107.6 25.4C107.9 21.9 111.5 21.3 112.4 23.8C112.9 25.6 112.5 28.4 112.3 31.4C112 38.4 113 47.6 110.8 56C108.4 63.6 97 69.4 84 70.8Z"/><path class="sq-fine" d="M108.8 22l.4 2M111 22.3l-.3 1.9M107.6 58.2C104.6 61 100.6 63 96.4 64.2"/></g>
+      <g class="sq-carried-acorn">${held}</g>
+      <g class="sq-holding-paw"><path class="sq-paper" d="M79 64.6C84.6 67.8 90.4 71 96 70.2C99.8 69.6 100.8 72.6 98.4 74.4C92.6 78 83.6 74.4 77.8 69.8Z"/><path class="sq-wash" transform="translate(0.8 0.8)" d="M79 64.6C84.6 67.8 90.4 71 96 70.2C99.8 69.6 100.8 72.6 98.4 74.4C92.6 78 83.6 74.4 77.8 69.8Z"/><path class="sq-line" d="M79 64.6C84.6 67.8 90.4 71 96 70.2C99.8 69.6 100.8 72.6 98.4 74.4C92.6 78 83.6 74.4 77.8 69.8Z"/><path class="sq-fine" d="M95.6 73.2l2.6-1"/></g>
+      <g class="sq-exclaim"><path class="sq-line" d="M103.6-13.6C103.1-7.6 102.7-3 102.4.6"/><circle class="sq-ink-fill" cx="102.2" cy="4.8" r="1.25"/><path class="sq-fine" d="M96.2-7.8l-3.2-2.6M110.4-7l3.4-2.2"/></g>
+      <g class="sq-zzz"><path class="sq-fine" d="M113 30.4h4.2l-4.2 4.4h4.2"/><path class="sq-fine" d="M119.6 21.4h3l-3 3.2h3"/></g>
+      </g>
+      </svg>
     </div>
-    <div class="squirrel-actor">
-      <div class="squirrel-facing">
-        <svg class="squirrel-art" viewBox="0 0 128 104" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <ellipse cx="64" cy="99" rx="28" ry="2.4" fill="var(--sq-outline)" opacity=".09"/>
-          <g class="sq-tail sq-outline">
-            <path d="M51 79C33 86 11 77 8 59 5 43 18 34 22 26 28 16 22 9 16 12 12 14 12 19 15 22 4 21 3 11 10 6 22-4 42 9 45 26 49 44 31 51 32 63 33 70 41 72 51 71Z" fill="var(--sq-tail)"/>
-            <path d="M42 76C24 75 18 65 20 55 23 41 39 34 35 21 33 14 27 10 22 11" stroke="var(--sq-tail-light)" stroke-width="5"/>
-            <path d="M13 54c-1 8 3 14 8 17M34 33c-2 7-8 10-11 17" stroke="var(--sq-outline)" stroke-width="1.1" opacity=".35"/>
-          </g>
-          <g class="sq-hind-far sq-outline" fill="var(--sq-fur-shade)">
-            <path d="M52 78c-3 6-10 11-12 15h-8c-3 0-4 4 0 4h15l14-14Z"/>
-          </g>
-          <g class="sq-front-far sq-outline" fill="var(--sq-fur-shade)">
-            <path d="M78 73l-5 19h-6c-3 0-4 4 0 4h13l7-20Z"/>
-          </g>
-          <path class="sq-outline" d="M43 76c-1-11 5-21 16-23 9-1 19 3 24 12 5 8 5 18-2 24-8 7-28 7-36-1-3-3-4-7-2-12Z" fill="var(--sq-fur)"/>
-          <path d="M75 59c13 6 18 23 8 30-5 4-10 4-13 1 5-10 5-19 0-27Z" fill="var(--sq-belly)"/>
-          <g class="sq-hind-near sq-outline" fill="var(--sq-fur)">
-            <path d="M48 75c-8 3-8 15 1 18l-4 1h-5c-4 0-4 4 0 4h18c5 0 7-3 5-6l-5-6"/>
-            <path d="M48 96h3m3 0h3" stroke-width="1.1"/>
-          </g>
-          <g class="sq-front-near sq-outline" fill="var(--sq-fur)">
-            <path d="M78 75c0 7 4 13 8 17l9 1c4 0 4 5 0 5H83c-6-5-11-11-13-18"/>
-            <path d="M90 96h2m-6 0h1" stroke-width="1.1"/>
-          </g>
-          <g class="sq-head">
-            <path class="sq-outline" d="M72 37c-4-7-4-17 0-21 6 2 10 9 10 16" fill="var(--sq-fur-shade)"/>
-            <path class="sq-outline" d="M82 34c0-9 4-18 9-19 5 6 4 16 0 23" fill="var(--sq-fur)"/>
-            <path d="M86 32c0-5 2-10 4-12 2 4 1 8 0 12" fill="var(--sq-ear)"/>
-            <path class="sq-outline" d="M72 38c6-8 19-9 25-1 4 4 4 8 6 10l9 5c2 2 0 6-4 7l-11 2c-4 5-11 6-17 3-11-4-14-15-8-26Z" fill="var(--sq-fur)"/>
-            <path d="M94 49c7-1 10 2 16 4 0 5-9 6-13 7-3 3-6 3-9 2" fill="var(--sq-belly)"/>
-            <ellipse class="sq-eye" cx="93" cy="43" rx="2.7" ry="3.1" fill="var(--sq-eye)"/>
-            <circle cx="93.8" cy="42" r=".85" fill="#fff"/>
-            <path d="M107 50c4-1 7 1 5 3-1 2-4 1-5-3Z" fill="var(--sq-eye)"/>
-            <path d="M104 56c-2 2-4 2-6 1M105 59l5 1" stroke="var(--sq-outline)" stroke-width="1.2" stroke-linecap="round"/>
-            <path d="M73 44l-4 1m5 4-4 2" stroke="var(--sq-fur-shade)" stroke-width="1.3" stroke-linecap="round"/>
-          </g>
-          <g class="sq-arm sq-outline">
-            <path d="M80 63c4 5 10 7 15 7 4 1 4 5 0 6-8 1-16-3-20-8" fill="var(--sq-fur)"/>
-            <path d="M93 73h3" stroke-width="1.1"/>
-          </g>
-          <g class="sq-reach sq-outline">
-            <path d="M80 65c7-8 11-21 18-38l2-6c1-3 5-2 5 1l-1 8c-3 16-11 33-18 39" fill="var(--sq-fur)"/>
-            <path d="M100 23l3 1" stroke-width="1.1"/>
-          </g>
-          <g class="sq-carried-acorn">
-            <svg class="sq-held-icon sq-held-acorn" x="88" y="51" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">${acornDrawing}</svg>
-          </g>
-          <g class="sq-holding-paw sq-outline">
-            <path d="M79 65c6 3 11 6 17 5 4-1 5 3 2 5-6 4-17 0-22-5" fill="var(--sq-fur)"/>
-            <path d="M95 73l3-1" stroke-width="1.1"/>
-          </g>
-          <g class="sq-lantern">
-            <ellipse class="sq-lantern-glow" cx="89" cy="70" rx="17" ry="14" fill="#F5D78A" opacity=".30"/>
-            <path d="M85 60h8M86.5 60v-3a2.5 2.5 0 0 1 5 0v3" stroke="#E7C16D" stroke-width="1.4" stroke-linecap="round"/>
-            <rect x="84" y="60" width="11" height="14" rx="3" fill="#6A513A" stroke="#E7C16D" stroke-width="1.3"/>
-            <rect x="86.4" y="63" width="6.2" height="6.7" rx="2" fill="#F6D685" opacity=".95"/>
-            <path d="M89.5 71.5v4.5" stroke="#E7C16D" stroke-width="1.3" stroke-linecap="round"/>
-          </g>
-        </svg>
-      </div>
-    </div>
-    <div class="squirrel-transfer" hidden></div>`;
+  </div>
+  <div class="squirrel-transfer" hidden></div>`;
   document.body.appendChild(stage);
 
   const actor = stage.querySelector('.squirrel-actor');
   const facing = stage.querySelector('.squirrel-facing');
+  const figure = stage.querySelector('.sq-figure');
   const transfer = stage.querySelector('.squirrel-transfer');
-  const burrow = stage.querySelector('.squirrel-burrow');
-  const heldIcon = stage.querySelector('.sq-held-acorn');
+  const heldIcon = stage.querySelector('.sq-held-icon');
+  const flyingIcon = sourceIcon.cloneNode(true);
+  flyingIcon.removeAttribute('class');
+  transfer.appendChild(flyingIcon);
+  actor.classList.toggle('is-winter', isWinter);
 
-  function isDark() {
-    return document.documentElement.getAttribute('data-theme') === 'dark';
-  }
-
-  function acornSvg() {
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round">${acornDrawing}</svg>`;
-  }
-  function pebbleSvg() {
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M6.2 14.2c0-4.8 3.5-8.5 7.8-8.5 3.6 0 5.8 2.4 5.8 5.6 0 4.4-3.7 7.7-8.5 7.7-3.2 0-5.1-1.8-5.1-4.8Z" fill="currentColor" fill-opacity=".18"/><path d="M6.2 14.2c0-4.8 3.5-8.5 7.8-8.5 3.6 0 5.8 2.4 5.8 5.6 0 4.4-3.7 7.7-8.5 7.7-3.2 0-5.1-1.8-5.1-4.8Z"/></svg>`;
-  }
-  function leafSvg() {
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><path d="M18.8 5.4c-6 .1-10.2 2.1-12.2 6.1-2 4 .2 7.7 4.9 8.4 5 .8 8.8-2.2 9.4-8.2.2-2.2-.2-4.3-2.1-6.3Z" fill="currentColor" fill-opacity=".16"/><path d="M7.8 16.6c3.3-2.4 5.7-5 8.8-9.1M12.1 11.2c1.7.1 2.9.8 4.2 1.8M10.2 13.7c1.2.1 2.1.5 3.1 1.2"/></svg>`;
-  }
-
-  function setTransferKind(kind) {
-    transferKind = kind;
-    transfer.innerHTML = kind === 'acorn' ? acornSvg() : (kind === 'pebble' ? pebbleSvg() : leafSvg());
-  }
-  setTransferKind('acorn');
+  const TRANSIENT = ['is-running', 'is-reaching', 'is-sniffing', 'is-carrying', 'is-yawning',
+    'is-startled', 'is-hurrying', 'is-tucked', 'is-peeking'];
 
   function syncButton() {
     button.dataset.acorn = away ? 'away' : 'home';
     button.setAttribute('aria-pressed', String(away));
     button.setAttribute('aria-busy', String(busy));
+    button.setAttribute('aria-disabled', String(busy));
     button.classList.toggle('is-busy', busy);
-    button.title = busy
-      ? 'Psst… the squirrel is sneaking about.'
-      : (away ? 'Knock to have the squirrel bring the acorn back.' : 'Knock, or drag the acorn for the squirrel to chase it.');
+    button.title = busy ? 'The squirrel is on its way…' :
+      (away ? 'Ask the squirrel to bring the acorn back' : 'Let the squirrel take the acorn');
   }
 
   function setAway(next) {
     away = next;
-    try { sessionStorage.setItem(STORAGE_KEY, away ? 'away' : 'home'); } catch (_) {}
+    // Per-tab state: navigation between these pages keeps the same acorn.
+    writeStore('sessionStorage', STORAGE_KEY, away ? 'away' : 'home');
     syncButton();
   }
 
@@ -161,14 +141,18 @@
     error.name = 'AbortError';
     return error;
   }
+
   function checkSignal(signal) {
     if (signal.aborted) throw abortError();
   }
 
+  // No requestAnimationFrame loop is running while the feature is idle.
+  // Time is scaled by `tempo`, so an impatient visitor can hurry the squirrel.
   function animate(duration, update, signal) {
     return new Promise(function (resolve, reject) {
       if (signal.aborted) { reject(abortError()); return; }
-      const started = performance.now();
+      let last = performance.now();
+      let elapsed = 0;
       let frame = 0;
       function cancel() {
         cancelAnimationFrame(frame);
@@ -176,7 +160,9 @@
         reject(abortError());
       }
       function tick(now) {
-        const t = Math.min(1, Math.max(0, (now - started) / duration));
+        elapsed += Math.max(0, now - last) * tempo;
+        last = now;
+        const t = Math.min(1, elapsed / duration);
         try { update(t); } catch (error) {
           signal.removeEventListener('abort', cancel);
           reject(error);
@@ -196,7 +182,7 @@
       const timer = setTimeout(function () {
         signal.removeEventListener('abort', cancel);
         resolve();
-      }, duration);
+      }, duration / tempo);
       function cancel() {
         clearTimeout(timer);
         signal.removeEventListener('abort', cancel);
@@ -206,14 +192,33 @@
     });
   }
 
+  let boilTimer = 0;
+  let boilFrame = 0;
+  function startBoil() {
+    if (boilTimer || motionPreference.matches) return;
+    boilTimer = setInterval(function () {
+      boilFrame = (boilFrame + 1) % 3;
+      figure.setAttribute('filter', 'url(#sq-rough-' + boilFrame + ')');
+    }, 130);
+  }
+  function stopBoil() {
+    clearInterval(boilTimer);
+    boilTimer = 0;
+    boilFrame = 0;
+    figure.setAttribute('filter', 'url(#sq-rough-0)');
+  }
+
   function face(next) {
     direction = next < 0 ? -1 : 1;
     facing.style.transform = 'scaleX(' + direction + ')';
   }
 
+  // Coordinates are relative to the viewport; position is the feet's center.
   function place(x, y) {
     position = { x: x, y: y };
-    actor.style.transform = 'translate3d(' + (x - spriteWidth / 2).toFixed(2) + 'px,' + (y - spriteHeight).toFixed(2) + 'px,0)';
+    actor.style.transform = 'translate3d(' + (x - spriteWidth / 2).toFixed(2) +
+      'px,' + (y - spriteHeight).toFixed(2) + 'px,0)' +
+      (spin ? ' rotate(' + spin.toFixed(1) + 'deg)' : '');
   }
 
   function handPoint(x, y) {
@@ -237,49 +242,41 @@
         const step = Math.abs(Math.sin(t * duration / 66)) * 2 * Math.sin(Math.PI * t);
         place(start.x + (x - start.x) * e, start.y + (y - start.y) * e - hop - step);
       }, signal);
-    } finally {
-      actor.classList.remove('is-running');
-    }
+    } finally { actor.classList.remove('is-running'); }
   }
 
-  async function sniff(duration, signal) {
-    actor.classList.add('is-sniffing');
-    try { await pause(duration, signal); }
-    finally { actor.classList.remove('is-sniffing'); }
+  // Straight, leg-less movement (rising out of the bottom edge, for instance).
+  async function glide(x, y, duration, signal) {
+    const start = { x: position.x, y: position.y };
+    await animate(duration, function (t) {
+      const e = ease(t);
+      place(start.x + (x - start.x) * e, start.y + (y - start.y) * e);
+    }, signal);
   }
 
-  async function alertPause(duration, signal) {
-    actor.classList.add('is-alert');
+  async function holdClass(name, duration, signal) {
+    actor.classList.add(name);
     try { await pause(duration, signal); }
-    finally { actor.classList.remove('is-alert'); }
+    finally { actor.classList.remove(name); }
   }
+
+  function sniff(duration, signal) { return holdClass('is-sniffing', duration, signal); }
 
   function putTransferAt(point, iconSize, angle) {
-    transfer.style.transform = 'translate3d(' + (point.x - iconSize / 2).toFixed(2) + 'px,' + (point.y - iconSize / 2).toFixed(2) + 'px,0) rotate(' + angle + 'deg)';
+    transfer.style.transform = 'translate3d(' + (point.x - iconSize / 2).toFixed(2) +
+      'px,' + (point.y - iconSize / 2).toFixed(2) + 'px,0) rotate(' + angle + 'deg)';
   }
 
-  async function moveTransfer(from, to, geometry, signal, arc) {
-    const lift = typeof arc === 'number' ? arc : 7;
+  async function moveAcorn(from, to, geometry, signal) {
     putTransferAt(from, geometry.iconSize, 0);
     transfer.hidden = false;
     await animate(380, function (t) {
       const e = ease(t);
       putTransferAt({
         x: from.x + (to.x - from.x) * e,
-        y: from.y + (to.y - from.y) * e - Math.sin(Math.PI * t) * lift
+        y: from.y + (to.y - from.y) * e - Math.sin(Math.PI * t) * 7
       }, geometry.iconSize, Math.sin(Math.PI * t) * -12);
     }, signal);
-  }
-
-  function setBurrowAt(g) {
-    burrow.style.transform = 'translate3d(' + (g.door.x - g.doorWidth / 2).toFixed(2) + 'px,' + (g.door.y - g.doorHeight / 2).toFixed(2) + 'px,0)';
-  }
-  function openBurrow() {
-    burrow.hidden = false;
-    burrow.classList.add('is-open');
-  }
-  function closeBurrow() {
-    burrow.classList.remove('is-open');
   }
 
   function measure() {
@@ -290,11 +287,8 @@
     spriteHeight = 104 * scale;
     actor.style.width = spriteWidth + 'px';
     actor.style.height = spriteHeight + 'px';
-
-    const navRect = nav.getBoundingClientRect();
-    const markRect = mark.getBoundingClientRect();
     const rect = sourceIcon.getBoundingClientRect();
-    const buttonTarget = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    const target = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
     const iconSize = rect.width || 19;
     const rawIconSize = iconSize / scale;
     heldIcon.setAttribute('x', 102 - rawIconSize / 2);
@@ -303,78 +297,21 @@
     heldIcon.setAttribute('height', rawIconSize);
     transfer.style.width = iconSize + 'px';
     transfer.style.height = iconSize + 'px';
-
-    const dock = { x: buttonTarget.x - (104 - 64) * scale, y: buttonTarget.y + (104 - 23) * scale };
-    const runway = Math.min(height - 8, navRect.bottom + (width > 700 ? 34 : 28));
-    const lane = Math.min(height - 8, runway + (width > 700 ? 10 : 6));
-    const door = {
-      x: Math.max(28, markRect.left + markRect.width * 0.84),
-      y: Math.min(height - 20, navRect.bottom - 2)
-    };
-    const doorWidth = width <= 700 ? 42 : 48;
-    const doorHeight = width <= 700 ? 28 : 32;
-    return { width, height, buttonTarget, iconSize, dock, runway, lane, door, doorWidth, doorHeight, navRect };
+    // Its raised paw (drawn at 110.5, 23) meets the exact center of the button.
+    const dock = { x: target.x - (110.5 - 64) * scale, y: target.y + (104 - 23) * scale };
+    const runway = Math.min(height - 8, nav.getBoundingClientRect().bottom + 44);
+    const lowLane = Math.min(height - 8, runway + (width > 700 ? 64 : 23));
+    return { width, height, target, iconSize, dock, runway, lowLane };
   }
 
-  function clampPoint(pt, g) {
-    const marginX = 24;
-    const minY = g.navRect.bottom + 8;
-    const maxY = Math.min(g.height - 26, g.navRect.bottom + (g.width > 700 ? 120 : 90));
-    return {
-      x: Math.max(marginX, Math.min(g.width - marginX, pt.x)),
-      y: Math.max(minY, Math.min(maxY, pt.y))
-    };
-  }
-
-  async function maybeFreezeIfWatched(point, g, signal) {
-    const nearTarget = Math.hypot(mouse.x - point.x, mouse.y - point.y) < (g.width <= 700 ? 86 : 104);
-    const nearSelf = Math.hypot(mouse.x - position.x, mouse.y - (position.y - spriteHeight * 0.56)) < (g.width <= 700 ? 82 : 98);
-    if (nearTarget || nearSelf) {
-      await alertPause(420, signal);
-    }
-  }
-
-  async function popOut(g, returning, signal) {
-    setBurrowAt(g);
-    stage.hidden = false;
-    openBurrow();
-    actor.classList.toggle('is-carrying', returning);
-    actor.classList.toggle('is-lantern', isDark());
-    face(1);
-    place(g.door.x - 4, g.runway + 30);
-    actor.classList.add('is-peeking');
-    await animate(320, function (t) {
-      const e = ease(t);
-      place(g.door.x - 4, g.runway + 30 - 24 * e);
-    }, signal);
-    actor.classList.remove('is-peeking');
-    await sniff(180, signal);
-    await maybeFreezeIfWatched(g.buttonTarget, g, signal);
-  }
-
-  async function tuckIntoBurrow(g, signal) {
-    face(-1);
-    await runTo(g.door.x + 6, g.runway + 2, 220, 4, signal);
-    actor.classList.add('is-peeking');
-    await animate(280, function (t) {
-      const e = ease(t);
-      place(g.door.x - 4, g.runway + 2 + 26 * e);
-    }, signal);
-    actor.classList.remove('is-peeking');
-    closeBurrow();
-    await pause(170, signal);
-    burrow.hidden = true;
-  }
-
-  async function takeAcornFrom(point, g, signal) {
+  async function takeAcorn(g, signal) {
     actor.classList.add('is-reaching');
-    await pause(190, signal);
-    setTransferKind('acorn');
-    putTransferAt(point, g.iconSize, 0);
+    await pause(220, signal);
+    // The visible object transfers to the squirrel exactly at the handoff.
+    putTransferAt(g.target, g.iconSize, 0);
     transfer.hidden = false;
-    button.classList.remove('is-drag-lifted');
     setAway(true);
-    await moveTransfer(point, handPoint(102, 65), g, signal);
+    await moveAcorn(g.target, handPoint(102, 65), g, signal);
     actor.classList.remove('is-reaching');
     actor.classList.add('is-carrying');
     transfer.hidden = true;
@@ -382,261 +319,430 @@
 
   async function returnAcorn(g, signal) {
     const hand = handPoint(102, 65);
-    setTransferKind('acorn');
     putTransferAt(hand, g.iconSize, 0);
     transfer.hidden = false;
     actor.classList.remove('is-carrying');
     actor.classList.add('is-reaching');
-    await moveTransfer(hand, g.buttonTarget, g, signal);
+    await moveAcorn(hand, g.target, g, signal);
     setAway(false);
     transfer.hidden = true;
     actor.classList.remove('is-reaching');
     button.classList.add('just-returned');
   }
 
-  async function wrongDeliveryGag(g, signal) {
-    const hand = handPoint(102, 65);
-    actor.classList.remove('is-carrying');
-    actor.classList.add('is-reaching');
-    setTransferKind(Math.random() < 0.5 ? 'pebble' : 'leaf');
-    await moveTransfer(hand, g.buttonTarget, g, signal, 4);
-    await pause(180, signal);
-    await alertPause(280, signal);
-    await moveTransfer(g.buttonTarget, hand, g, signal, 4);
-    transfer.hidden = true;
-    actor.classList.remove('is-reaching');
-    actor.classList.add('is-carrying');
-    await runTo(g.door.x + 26, g.runway, 260, 5, signal);
-    await runTo(g.dock.x, g.dock.y, 260, 5, signal);
+  // Late at night the first pause of each visit becomes a yawn.
+  async function linger(duration, signal, first) {
+    if (first && isNight) await holdClass('is-yawning', duration + 520, signal);
+    else await sniff(duration, signal);
   }
 
   async function fullVisit(returning, g, signal) {
-    await popOut(g, returning, signal);
+    actor.classList.toggle('is-carrying', returning);
     if (returning) {
-      await runTo(g.width * 0.26, g.runway, 440, 10, signal);
-      await sniff(160, signal);
-      await runTo(g.dock.x - 42, g.runway, 680, 7, signal);
-      await maybeFreezeIfWatched(g.buttonTarget, g, signal);
-      await runTo(g.dock.x, g.dock.y, 300, 5, signal);
-      await sniff(120, signal);
-      const doGag = Math.random() < 0.14;
-      if (doGag) await wrongDeliveryGag(g, signal);
-      await returnAcorn(g, signal);
-      actor.classList.toggle('is-lantern', isDark());
-      await pause(130, signal);
-      await runTo(g.width * 0.22, g.runway, 720, 12, signal);
-      await tuckIntoBurrow(g, signal);
+      face(-1);
+      place(g.width + spriteWidth, g.lowLane);
+      stage.hidden = false;
+      await runTo(g.width * .87, g.lowLane, 440, 8, signal);
+      await runTo(g.width * .56, g.runway, 650, 18, signal);
+      await linger(210, signal, true);
+      await runTo(g.width * .38, g.runway, 460, 5, signal);
+      await sniff(180, signal);
+      await runTo(g.dock.x, g.dock.y, 770, 12, signal);
     } else {
-      await runTo(g.width * 0.24, g.runway, 460, 10, signal);
-      await sniff(140, signal);
-      await runTo(g.dock.x - 42, g.runway, 680, 7, signal);
-      await maybeFreezeIfWatched(g.buttonTarget, g, signal);
-      await runTo(g.dock.x, g.dock.y, 300, 5, signal);
-      await sniff(120, signal);
-      await takeAcornFrom(g.buttonTarget, g, signal);
-      actor.classList.remove('is-lantern');
-      await pause(130, signal);
-      await runTo(g.width * 0.22, g.runway, 720, 12, signal);
-      await tuckIntoBurrow(g, signal);
+      face(1);
+      place(-spriteWidth, g.lowLane);
+      stage.hidden = false;
+      await runTo(g.width * .14, g.lowLane, 430, 8, signal);
+      await runTo(g.width * .23, g.runway, 460, 20, signal);
+      await runTo(g.width * .43, g.runway, 560, 5, signal);
+      await linger(240, signal, true);
+      await runTo(g.width * .31, g.runway, 330, 5, signal);
+      await sniff(150, signal);
+      await runTo(g.dock.x - 36, g.runway, 590, 8, signal);
+      await runTo(g.dock.x, g.dock.y, 300, 6, signal);
     }
-  }
-
-  async function dragVisit(dropPoint, g, signal) {
-    await popOut(g, false, signal);
-    await runTo(dropPoint.x - 30, g.runway, 440, 10, signal);
-    await maybeFreezeIfWatched(dropPoint, g, signal);
-    await runTo(dropPoint.x, dropPoint.y + (104 - 23) * scale, 380, 7, signal);
-    await sniff(110, signal);
-    await takeAcornFrom(dropPoint, g, signal);
-    actor.classList.remove('is-lantern');
-    await pause(120, signal);
-    await runTo(g.width * 0.22, g.runway, 760, 12, signal);
-    await tuckIntoBurrow(g, signal);
+    face(1);
+    await sniff(130, signal);
+    if (returning) await returnAcorn(g, signal);
+    else await takeAcorn(g, signal);
+    await pause(180, signal);
+    // Leave the viewport completely; the overlay is removed from rendering.
+    if (returning) await runTo(-spriteWidth, g.runway, 1000, 19, signal);
+    else await runTo(g.width + spriteWidth, g.runway, 920, 18, signal);
   }
 
   async function quietVisit(returning, g, signal) {
-    stage.hidden = false;
-    setBurrowAt(g);
-    openBurrow();
+    // Respect reduced-motion preferences: a stationary visitor, no running.
     face(1);
     place(g.dock.x, g.dock.y);
     actor.classList.add('is-reaching');
     actor.classList.toggle('is-carrying', returning);
-    await pause(120, signal);
+    stage.hidden = false;
+    await pause(140, signal);
     setAway(!returning);
     actor.classList.toggle('is-carrying', !returning);
-    await pause(120, signal);
-    actor.classList.remove('is-reaching');
-    closeBurrow();
+    await pause(180, signal);
   }
 
-  async function quietDrag(dropPoint, g, signal) {
-    stage.hidden = false;
-    setBurrowAt(g);
-    openBurrow();
-    face(1);
-    place(dropPoint.x, dropPoint.y + (104 - 23) * scale);
-    actor.classList.add('is-reaching');
-    await pause(120, signal);
-    button.classList.remove('is-drag-lifted');
-    setAway(true);
-    actor.classList.add('is-carrying');
-    await pause(120, signal);
-    actor.classList.remove('is-reaching');
-    closeBurrow();
-  }
-
-  async function runScenario(mode, payload) {
-    if (busy) return;
+  // One performance at a time: visits and every easter egg share this lock,
+  // so the page never has two squirrels.
+  async function perform(name, script) {
+    if (busy) return 'busy';
     busy = true;
+    kind = name;
+    tempo = 1;
+    impatience = 0;
     const controller = new AbortController();
     activeController = controller;
     button.classList.remove('just-returned');
     syncButton();
     status.textContent = '';
-    let interrupted = false;
+    startBoil();
+    let result = 'done';
     try {
-      const geometry = measure();
-      if (mode === 'return') {
-        if (motionPreference.matches) await quietVisit(true, geometry, controller.signal);
-        else await fullVisit(true, geometry, controller.signal);
-      } else if (mode === 'take') {
-        if (motionPreference.matches) await quietVisit(false, geometry, controller.signal);
-        else await fullVisit(false, geometry, controller.signal);
-      } else if (mode === 'drag') {
-        const dropPoint = clampPoint(payload.point, geometry);
-        setTransferKind('acorn');
-        putTransferAt(dropPoint, geometry.iconSize, 0);
-        transfer.hidden = false;
-        if (motionPreference.matches) await quietDrag(dropPoint, geometry, controller.signal);
-        else await dragVisit(dropPoint, geometry, controller.signal);
-      }
+      await script(measure(), controller.signal);
     } catch (error) {
-      interrupted = true;
+      result = 'interrupted';
       if (error.name !== 'AbortError') console.error('Squirrel animation:', error);
     } finally {
+      stopBoil();
+      clearTimeout(startleTimer);
       stage.hidden = true;
-      burrow.hidden = true;
       transfer.hidden = true;
-      button.classList.remove('is-drag-lifted');
-      actor.classList.remove('is-running', 'is-reaching', 'is-sniffing', 'is-carrying', 'is-alert', 'is-peeking', 'is-lantern');
+      TRANSIENT.forEach(function (name) { actor.classList.remove(name); });
+      spin = 0;
+      tempo = 1;
       button.classList.remove('just-returned');
       if (activeController === controller) activeController = null;
       busy = false;
+      kind = '';
       syncButton();
-      status.textContent = interrupted
-        ? (away ? 'The squirrel still has the acorn. Press again to ask for it back.' : 'The acorn is at home. Click or drag it again whenever you like.')
-        : (away ? 'The squirrel quietly borrowed the acorn.' : 'The squirrel returned the acorn and slipped back inside.');
     }
+    return result;
   }
 
-  function handleClick() {
-    if (suppressNextClick) {
-      suppressNextClick = false;
+  async function visit() {
+    if (busy) { if (kind === 'visit') growImpatient(); return; }
+    const returning = away;
+    const result = await perform('visit', function (g, signal) {
+      return motionPreference.matches ? quietVisit(returning, g, signal) : fullVisit(returning, g, signal);
+    });
+    if (result === 'busy') return;
+    status.textContent = result === 'interrupted'
+      ? (away ? 'The acorn is away. Press again to bring it back.' : 'The acorn is here. Press again to call the squirrel.')
+      : (away ? 'The squirrel took the acorn. Press again to bring it back.' : 'The squirrel returned the acorn.');
+    if (result === 'done' && returning) countTrip();
+  }
+
+  function cancelVisit() { if (activeController) activeController.abort(); }
+
+  /* ---------------- Easter egg: an impatient visitor ----------------
+     Pressing the acorn three more times during a visit startles the squirrel
+     ("!") and it finishes the trip at a hurry. */
+  function growImpatient() {
+    impatience += 1;
+    if (impatience !== 3 || motionPreference.matches) return;
+    tempo = 1.9;
+    actor.classList.add('is-startled', 'is-hurrying');
+    clearTimeout(startleTimer);
+    startleTimer = setTimeout(function () { actor.classList.remove('is-startled'); }, 820);
+  }
+
+  /* ---------------- Easter egg: a backflip (the Konami code) ---------------- */
+  async function backflip(g, signal) {
+    actor.classList.toggle('is-carrying', away);
+    face(1);
+    if (motionPreference.matches) {
+      place(g.width / 2, g.runway);
+      stage.hidden = false;
+      await pause(900, signal);
       return;
     }
-    if (busy) return;
-    runScenario(away ? 'return' : 'take', null);
+    // A lane a little below the usual runway leaves headroom for the jump.
+    const lane = Math.min(g.height - 8, g.runway + (g.width > 700 ? 60 : 38));
+    place(-spriteWidth, lane);
+    stage.hidden = false;
+    const takeoff = g.width * .32;
+    const landing = Math.min(g.width - spriteWidth, takeoff + Math.max(110, g.width * .16));
+    await runTo(takeoff, lane, 640, 10, signal);
+    await sniff(200, signal);
+    actor.classList.add('is-tucked');
+    await animate(760, function (t) {
+      spin = -360 * ease(t);
+      place(takeoff + (landing - takeoff) * t, lane - Math.sin(Math.PI * t) * 44);
+    }, signal);
+    spin = 0;
+    actor.classList.remove('is-tucked');
+    place(landing, lane);
+    await sniff(320, signal);
+    await runTo(g.width + spriteWidth, lane, 900, 16, signal);
   }
 
-  function cancelVisit() {
-    if (activeController) activeController.abort();
-    if (pointerState && pointerState.cleanup) pointerState.cleanup();
+  /* ---------------- Easter egg: a peek from the bottom edge ----------------
+     Typing "acorn" or "squirrel" brings it up for a look around. If the acorn is
+     away, it peeks while holding it. */
+  async function peek(g, signal) {
+    const carrying = away;
+    actor.classList.toggle('is-carrying', carrying);
+    actor.classList.add('is-peeking');
+    face(-1);
+    const x = Math.min(g.width - spriteWidth * .42, Math.max(spriteWidth, g.width * .84));
+    const hidden = g.height + spriteHeight + 8;
+    const shown = g.height + spriteHeight * (carrying ? .2 : .36);
+    place(x, hidden);
+    stage.hidden = false;
+    if (motionPreference.matches) {
+      place(x, shown);
+      await pause(1100, signal);
+      return;
+    }
+    await glide(x, shown, 460, signal);
+    await sniff(420, signal);
+    face(1);
+    await pause(340, signal);
+    face(-1);
+    await sniff(380, signal);
+    await glide(x, hidden, 320, signal);
   }
 
-  function startPointerDrag(event) {
-    if (busy || away) return;
-    if (event.pointerType === 'mouse' && event.button !== 0) return;
-    const start = { x: event.clientX, y: event.clientY };
-    let dragging = false;
-
-    function move(ev) {
-      mouse.x = ev.clientX;
-      mouse.y = ev.clientY;
-      if (!dragging) {
-        const dist = Math.hypot(ev.clientX - start.x, ev.clientY - start.y);
-        if (dist < 7) return;
-        dragging = true;
-        suppressNextClick = true;
-        button.classList.add('is-drag-lifted');
-        stage.hidden = false;
-        const g = measure();
-        const point = clampPoint({ x: ev.clientX, y: ev.clientY }, g);
-        setTransferKind('acorn');
-        putTransferAt(point, g.iconSize, 0);
-        transfer.hidden = false;
-      }
-      if (dragging) {
-        const g = measure();
-        const point = clampPoint({ x: ev.clientX, y: ev.clientY }, g);
-        putTransferAt(point, g.iconSize, Math.sin(ev.clientX / 18) * 8);
-      }
-    }
-
-    function cleanup() {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', cancel);
-      if (button.hasPointerCapture && button.hasPointerCapture(event.pointerId)) {
-        try { button.releasePointerCapture(event.pointerId); } catch (_) {}
-      }
-      pointerState = null;
-    }
-
-    function cancel() {
-      button.classList.remove('is-drag-lifted');
-      stage.hidden = true;
-      transfer.hidden = true;
-      cleanup();
-    }
-
-    function up(ev) {
-      if (!dragging) {
-        cleanup();
-        return;
-      }
-      const g = measure();
-      const point = clampPoint({ x: ev.clientX, y: ev.clientY }, g);
-      cleanup();
-      runScenario('drag', { point: point });
-    }
-
-    pointerState = { cleanup };
-    if (button.setPointerCapture) {
-      try { button.setPointerCapture(event.pointerId); } catch (_) {}
-    }
-    window.addEventListener('pointermove', move, { passive: true });
-    window.addEventListener('pointerup', up, { passive: true });
-    window.addEventListener('pointercancel', cancel, { passive: true });
+  /* ---------------- Easter egg: hide-and-seek in the footer ----------------
+     While the acorn is away, scrolling all the way down once per page finds the
+     squirrel there with it. */
+  const footer = document.querySelector('footer');
+  let scrolled = false;
+  let sought = false;
+  let seekTimer = 0;
+  window.addEventListener('scroll', function () { scrolled = true; }, { passive: true, once: true });
+  if (footer && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      clearTimeout(seekTimer);
+      const visible = entries.some(function (entry) { return entry.isIntersecting; });
+      if (!visible || sought || !away || !scrolled) return;
+      seekTimer = setTimeout(function () {
+        if (sought || !away || busy || document.hidden) return;
+        sought = true;
+        perform('peek', peek);
+      }, 850);
+    }, { threshold: .6 }).observe(footer);
   }
 
-  button.addEventListener('click', handleClick);
-  button.addEventListener('pointerdown', startPointerDrag);
-  document.addEventListener('mousemove', function (event) {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
-  }, { passive: true });
-  document.addEventListener('mouseleave', function () {
-    mouse.x = -10000;
-    mouse.y = -10000;
-  });
+  /* ---------------- Easter egg: an oak in the footer ----------------
+     Squirrels forget many of the acorns they bury, and some become oaks. Every
+     finished round trip is counted (in this browser only), and the footer grows
+     a sprout, then a sapling, then a young oak. */
+  const OAK = [
+    { at: 3, label: 'A sprout from a forgotten acorn',
+      art: '<path class="oak-ground" d="M3.4 17.7c4.2-.5 9-.6 13.2 0"/>' +
+        '<path d="M7.3 17.4c.3-1.7 1.5-2.7 2.9-2.7s2.5 1 2.8 2.5"/>' +
+        '<path d="M10.1 14.8c.1-1.8 0-3.4-.4-5"/>' +
+        '<path class="oak-leaf" d="M9.7 10.6C8.2 8.8 6 8.4 4.8 9c.9 1.8 3 2.6 4.9 1.6Z"/>' +
+        '<path class="oak-leaf" d="M9.8 9.9c1.4-2 3.6-2.7 5.1-2.2-.8 2-3 3-5.1 2.2Z"/>' },
+    { at: 8, label: 'An oak sapling from a forgotten acorn',
+      art: '<path class="oak-ground" d="M3 17.7c4.6-.5 9.4-.6 14 0"/>' +
+        '<path d="M10 17.6c.2-4.4-.2-9 .4-13.4"/>' +
+        '<path class="oak-leaf" d="M10 13.2c-1.8-.4-3.6-1.6-4-3.2 1.8-.4 3.4.8 4 3.2Z"/>' +
+        '<path class="oak-leaf" d="M10.1 10.6c1.6-.8 3.6-1 4.8-.2-1.2 1.4-3 1.6-4.8.2Z"/>' +
+        '<path class="oak-leaf" d="M10.2 7.4c-1.4-.6-2.6-1.8-2.8-3.2 1.6 0 2.6 1.4 2.8 3.2Z"/>' +
+        '<path class="oak-leaf" d="M10.4 5.2c.6-1.4 1.8-2.4 3.2-2.4-.4 1.6-1.6 2.4-3.2 2.4Z"/>' },
+    { at: 20, label: 'A young oak, grown from forgotten acorns',
+      art: '<path class="oak-ground" d="M2.6 17.7c5-.5 9.8-.6 14.8 0"/>' +
+        '<path d="M10 17.6c.3-2.2.1-4.2-.3-6.4M9.9 13.6l-1.9-1.7M10 12.7l1.7-1.3"/>' +
+        '<path class="oak-leaf" d="M5 10.4C3.6 10 3.2 8 4.6 7.2 4.4 5.4 6.2 4.4 7.6 5.2 8.2 3.6 10.6 3.2 11.8 4.6 13.2 3.8 15.2 4.8 15 6.6 16.6 7.2 16.6 9.4 15 10.2 14.6 11.6 12.6 12 11.6 11.2 10.6 12.2 8.6 12.2 7.8 11.2 6.6 11.8 5.2 11.6 5 10.4Z"/>' +
+        '<path d="M13.4 17.4c.2-.9.8-1.4 1.5-1.4s1.3.5 1.4 1.3"/>' }
+  ];
+  const oakNote = 'Squirrels forget many of the acorns they bury. Some grow into oaks.';
+
+  function tripCount() { return parseInt(readStore('localStorage', TRIPS_KEY) || '0', 10) || 0; }
+
+  function oakStage(trips) {
+    let stageIndex = 0;
+    OAK.forEach(function (step, i) { if (trips >= step.at) stageIndex = i + 1; });
+    return stageIndex;
+  }
+
+  let oakObserver = null;
+  function renderOak() {
+    const host = footer && footer.querySelector('.wrap > :last-child');
+    if (!host) return;
+    const stageIndex = oakStage(tripCount());
+    let oak = host.querySelector('.oak');
+    if (!stageIndex) { if (oak) oak.remove(); return; }
+    if (!oak) {
+      oak = document.createElement('span');
+      oak.className = 'oak';
+      oak.setAttribute('role', 'img');
+      host.insertBefore(oak, host.firstChild);
+    }
+    const step = OAK[stageIndex - 1];
+    if (oak.dataset.stage === String(stageIndex)) return;
+    oak.dataset.stage = String(stageIndex);
+    oak.setAttribute('aria-label', step.label + '. ' + oakNote);
+    oak.title = oakNote;
+    oak.innerHTML = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.1" ' +
+      'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + step.art + '</svg>';
+    // Play the growing animation once, the first time the new stage is on screen.
+    const seen = parseInt(readStore('localStorage', OAK_SEEN_KEY) || '0', 10) || 0;
+    if (seen >= stageIndex || !('IntersectionObserver' in window)) return;
+    if (oakObserver) oakObserver.disconnect();
+    oakObserver = new IntersectionObserver(function (entries) {
+      if (!entries.some(function (entry) { return entry.isIntersecting; })) return;
+      oakObserver.disconnect();
+      oakObserver = null;
+      writeStore('localStorage', OAK_SEEN_KEY, String(stageIndex));
+      oak.classList.remove('is-growing');
+      void oak.offsetWidth;
+      oak.classList.add('is-growing');
+    }, { threshold: 1 });
+    oakObserver.observe(oak);
+  }
+
+  function countTrip() {
+    writeStore('localStorage', TRIPS_KEY, String(tripCount() + 1));
+    renderOak();
+  }
+
+  /* ---------------- Easter egg: a name that gets denoised ----------------
+     Clicking the page heading three times (or typing "mask") masks its letters
+     and unmasks them a few at a time, the way a masked diffusion model decodes. */
+  const heading = document.querySelector('h1.name, h1.page-title');
+
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const swap = list[i]; list[i] = list[j]; list[j] = swap;
+    }
+    return list;
+  }
+
+  function denoise(el) {
+    if (!el || el.dataset.denoising === 'true' || el.children.length) return;
+    const text = el.textContent;
+    if (!text.trim() || text.length > 48) return;
+    el.dataset.denoising = 'true';
+    el.setAttribute('aria-label', text);
+    const cells = Array.from(text).map(function (ch) {
+      const span = document.createElement('span');
+      span.className = 'sq-tok';
+      span.textContent = ch;
+      span.setAttribute('aria-hidden', 'true');
+      return span;
+    });
+    el.textContent = '';
+    cells.forEach(function (cell) { el.appendChild(cell); });
+    const tokens = shuffle(cells.filter(function (cell) { return cell.textContent.trim(); }));
+    const noiseSteps = 3;
+    const decodeSteps = Math.min(5, tokens.length);
+    const timers = [];
+    let at = 0;
+    // Forward process: mask everything in a few quick steps.
+    for (let s = 0; s < noiseSteps; s += 1) {
+      const batch = tokens.slice(Math.floor(s * tokens.length / noiseSteps),
+        Math.floor((s + 1) * tokens.length / noiseSteps));
+      timers.push(setTimeout(function () {
+        batch.forEach(function (cell) { cell.classList.add('is-masked'); });
+      }, at));
+      at += 90;
+    }
+    at += 420;
+    // Reverse process: several tokens are committed in parallel at each step.
+    const order = shuffle(tokens.slice());
+    for (let s = 0; s < decodeSteps; s += 1) {
+      const batch = order.slice(Math.floor(s * order.length / decodeSteps),
+        Math.floor((s + 1) * order.length / decodeSteps));
+      timers.push(setTimeout(function () {
+        batch.forEach(function (cell) {
+          cell.classList.remove('is-masked');
+          cell.classList.add('is-fresh');
+        });
+        setTimeout(function () {
+          batch.forEach(function (cell) { cell.classList.remove('is-fresh'); });
+        }, 120);
+      }, at));
+      at += 190;
+    }
+    timers.push(setTimeout(function () {
+      el.textContent = text;
+      el.removeAttribute('aria-label');
+      delete el.dataset.denoising;
+    }, at + 700));
+  }
+
+  if (heading) {
+    let clicks = 0;
+    let clickTimer = 0;
+    heading.addEventListener('click', function () {
+      clicks += 1;
+      clearTimeout(clickTimer);
+      clickTimer = setTimeout(function () { clicks = 0; }, 700);
+      if (clicks < 3) return;
+      clicks = 0;
+      const selection = window.getSelection && window.getSelection();
+      if (selection && selection.removeAllRanges) selection.removeAllRanges();
+      denoise(heading);
+    });
+  }
+
+  /* ---------------- Keyboard: Escape, typed words, the Konami code ---------------- */
+  const KONAMI = 'arrowup arrowup arrowdown arrowdown arrowleft arrowright arrowleft arrowright b a';
+  let recentKeys = [];
+  let typed = '';
+
+  function isEditable(target) {
+    return target && (target.isContentEditable ||
+      /^(input|textarea|select)$/i.test(target.tagName || ''));
+  }
+
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && (busy || pointerState)) cancelVisit();
+    if (event.key === 'Escape') { if (busy) cancelVisit(); return; }
+    if (event.ctrlKey || event.metaKey || event.altKey || isEditable(event.target)) return;
+    const key = String(event.key || '').toLowerCase();
+    recentKeys = recentKeys.concat(key).slice(-10);
+    if (recentKeys.join(' ') === KONAMI) {
+      recentKeys = [];
+      perform('flip', backflip);
+      return;
+    }
+    if (key.length !== 1 || key < 'a' || key > 'z') return;
+    typed = (typed + key).slice(-12);
+    if (/(acorn|squirrel)$/.test(typed)) { typed = ''; perform('peek', peek); }
+    else if (/mask$/.test(typed)) { typed = ''; denoise(heading); }
   });
-  window.addEventListener('resize', cancelVisit, { passive: true });
+
+  /* ---------------- Interruptions ---------------- */
+  // Width changes cancel anything in progress. A height-only change (a phone's
+  // address bar sliding in and out) only cancels a peek from the bottom edge.
+  let lastWidth = document.documentElement.clientWidth;
+  window.addEventListener('resize', function () {
+    const width = document.documentElement.clientWidth;
+    if (width !== lastWidth || kind === 'peek') cancelVisit();
+    lastWidth = width;
+  }, { passive: true });
   window.addEventListener('pagehide', cancelVisit);
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) cancelVisit();
   });
   if (motionPreference.addEventListener) motionPreference.addEventListener('change', cancelVisit);
   else if (motionPreference.addListener) motionPreference.addListener(cancelVisit);
+  // Re-sync after the browser restores a document from its back/forward cache.
   window.addEventListener('pageshow', function () {
     if (!busy) {
-      try { away = sessionStorage.getItem(STORAGE_KEY) === 'away'; } catch (_) {}
+      away = readStore('sessionStorage', STORAGE_KEY) === 'away';
       syncButton();
+      renderOak();
     }
   });
 
+  button.addEventListener('click', visit);
   syncButton();
+  renderOak();
   button.hidden = false;
+
+  /* ---------------- Easter egg: a note for people who open the console ---------------- */
+  try {
+    console.log('%cA squirrel lives in the acorn at the top of this page.%c\n' +
+      'It answers to its own name, to a very old cheat code, and to a name clicked three times. ' +
+      'Escape sends it home.',
+      'font: 600 15px Georgia, serif; color: #8A5A2B;',
+      'font: 13px Georgia, serif; color: #7C6D5F;');
+  } catch (_) {}
 })();
