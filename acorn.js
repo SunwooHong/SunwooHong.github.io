@@ -37,7 +37,6 @@
   let activeController = null;
   let direction = 1;
   let position = { x: 0, y: 0 };
-  let spin = 0;
   let tempo = 1;
   let frozen = false;
   let impatience = 0;
@@ -141,20 +140,19 @@
   actor.classList.toggle('is-winter', isWinter);
 
   const TRANSIENT = ['is-running', 'is-reaching', 'is-sniffing', 'is-carrying', 'is-yawning',
-    'is-startled', 'is-hurrying', 'is-tucked', 'is-peeking', 'is-frozen', 'is-presenting', 'is-noticing', 'is-spinning'];
+    'is-startled', 'is-hurrying', 'is-peeking', 'is-frozen', 'is-presenting', 'is-noticing'];
 
   /* ---------------- Easter eggs and the hints the squirrel hands out ---------------- */
   const EGGS = [
     { id: 'call', hint: 'Call me by name. Type <kbd>squirrel</kbd> or <kbd>acorn</kbd> anywhere on the page and I’ll pop up from the bottom edge.' },
-    { id: 'flip', hint: 'I’ve been practising a backflip. Press <kbd>←</kbd> <kbd>→</kbd> <kbd>←</kbd> <kbd>→</kbd>, or tap me twice, quickly.' },
+    { id: 'oak', hint: 'Every round trip plants something at the top, next to About. Look again after one, two and three trips.' },
     { id: 'shower', hint: 'Shake the tree: scroll up and down, hard, a few times in a row. Mind your head.' },
     { id: 'denoise', hint: 'Click a page title three times. Its letters get masked, then decoded a few at a time, the way a masked diffusion model writes.' },
     { id: 'hurry', hint: 'In a rush? While I’m out on an errand, press the acorn three more times. I’ll hurry.' },
     { id: 'seek', hint: 'Lend me the acorn, then scroll all the way down. I like to hide near the footer.' },
-    { id: 'oak', hint: 'Every round trip plants something next to the © at the bottom. Look again after one, three and five trips.' },
     { id: 'mood', hint: 'Visit after 11 pm, or sometime in winter. I dress for the occasion.' }
   ];
-  const ALL_FOUND = 'That’s all eight. You now know every secret I have, except where I buried last year’s acorns.';
+  const ALL_FOUND = 'That’s all seven. You now know every secret I have, except where I buried last year’s acorns.';
 
   function foundSet() {
     try { return new Set(JSON.parse(readStore('localStorage', FOUND_KEY) || '[]')); } catch (_) { return new Set(); }
@@ -251,8 +249,7 @@
   function place(x, y) {
     position = { x: x, y: y };
     actor.style.transform = 'translate3d(' + (x - spriteWidth / 2).toFixed(2) +
-      'px,' + (y - spriteHeight).toFixed(2) + 'px,0)' +
-      (spin ? ' rotate(' + spin.toFixed(1) + 'deg)' : '');
+      'px,' + (y - spriteHeight).toFixed(2) + 'px,0)';
   }
 
   function handPoint(x, y) {
@@ -453,7 +450,6 @@
       stage.hidden = true;
       transfer.hidden = true;
       TRANSIENT.forEach(function (name) { actor.classList.remove(name); });
-      spin = 0;
       tempo = 1;
       frozen = false;
       button.classList.remove('just-returned');
@@ -514,9 +510,10 @@
     actor.classList.remove('is-noticing');
     actor.classList.add('is-frozen', 'is-presenting');
     const egg = nextHint();
-    const found = foundSet().size;
+    const found = foundSet();
+    const foundCount = EGGS.filter(function (item) { return found.has(item.id); }).length;
     fortuneText.innerHTML = egg ? egg.hint : ALL_FOUND;
-    fortuneCount.textContent = egg ? 'Found ' + found + ' of ' + EGGS.length : EGGS.length + ' of ' + EGGS.length;
+    fortuneCount.textContent = egg ? 'Found ' + foundCount + ' of ' + EGGS.length : EGGS.length + ' of ' + EGGS.length;
     // The nut sits in the squirrel's paws; the slip unrolls from it.
     const hand = handPoint(102, 63);
     const nutSize = 30;
@@ -564,31 +561,9 @@
     else setTimeout(finish, 300);
   }
 
-  // One click: a fortune. Two quick clicks (or taps): a backflip on the spot.
-  let tapTimer = 0;
-  let spinTimer = 0;
-  function spinInPlace() {
-    markFound('flip');
-    if (fortuneOpen) closeFortune(true);
-    if (motionPreference.matches) return;
-    actor.classList.remove('is-spinning');
-    void actor.offsetWidth;
-    actor.classList.add('is-spinning');
-    clearTimeout(spinTimer);
-    spinTimer = setTimeout(function () { actor.classList.remove('is-spinning'); }, 720);
-  }
   actor.addEventListener('click', function (event) {
     event.stopPropagation();
-    if (tapTimer) {
-      clearTimeout(tapTimer);
-      tapTimer = 0;
-      spinInPlace();
-      return;
-    }
-    tapTimer = setTimeout(function () {
-      tapTimer = 0;
-      if (fortuneOpen) closeFortune(); else openFortune();
-    }, 260);
+    if (fortuneOpen) closeFortune(); else openFortune();
   });
 
   // A mouse resting on the squirrel makes it stop and look up for a moment,
@@ -616,37 +591,6 @@
     actor.classList.add('is-startled', 'is-hurrying');
     clearTimeout(startleTimer);
     startleTimer = setTimeout(function () { actor.classList.remove('is-startled'); }, 820);
-  }
-
-  /* ---------------- Easter egg: a backflip (← → ← →, or a double click on the squirrel) ---------------- */
-  async function backflip(g, signal) {
-    markFound('flip');
-    actor.classList.toggle('is-carrying', away);
-    face(1);
-    // A lane a little below the usual runway leaves headroom for the jump.
-    const lane = Math.min(g.height - 8, g.runway + (g.width > 700 ? 60 : 38));
-    if (motionPreference.matches) {
-      place(g.width / 2, lane);
-      stage.hidden = false;
-      await pause(900, signal);
-      return;
-    }
-    place(-spriteWidth, lane);
-    stage.hidden = false;
-    const takeoff = g.width * .32;
-    const landing = Math.min(g.width - spriteWidth, takeoff + Math.max(110, g.width * .16));
-    await runTo(takeoff, lane, 640, 10, signal);
-    await sniff(200, signal);
-    actor.classList.add('is-tucked');
-    await animate(760, function (t) {
-      spin = -360 * ease(t);
-      place(takeoff + (landing - takeoff) * t, lane - Math.sin(Math.PI * t) * 44);
-    }, signal);
-    spin = 0;
-    actor.classList.remove('is-tucked');
-    place(landing, lane);
-    await sniff(320, signal);
-    await runTo(g.width + spriteWidth, lane, 900, 16, signal);
   }
 
   /* ---------------- Easter egg: a peek from the bottom edge ---------------- */
@@ -677,7 +621,7 @@
   /* ---------------- Easter egg: an acorn shower ----------------
      Shaking the page (scrolling up and down hard a few times) shakes the tree.
      Acorns rain down, settle along the bottom edge, and the squirrel runs
-     through to collect them. Clicking a fully grown footer oak does the same. */
+     through to collect them. Clicking the fully grown oak in the menu does the same. */
   async function shower(g, signal) {
     markFound('shower');
     const small = g.width < 560;
@@ -774,10 +718,11 @@
     }, { threshold: .6 }).observe(footer);
   }
 
-  /* ---------------- Easter egg: an oak in the footer ----------------
+  /* ---------------- Easter egg: an oak in the menu ----------------
      Squirrels forget many of the acorns they bury, and some become oaks. Every
      finished round trip is counted (in this browser only): one trip grows a
-     sprout, three a sapling, five a young oak, which drops acorns when clicked. */
+     sprout next to About, two a sapling, three a young oak, which drops acorns
+     when clicked. It grows where the visitor is already looking. */
   const OAK = [
     { at: 1, label: 'A sprout from a forgotten acorn',
       art: '<path class="oak-ground" d="M3.4 17.7c4.2-.5 9-.6 13.2 0"/>' +
@@ -785,14 +730,14 @@
         '<path d="M10.1 14.8c.1-1.8 0-3.4-.4-5"/>' +
         '<path class="oak-leaf" d="M9.7 10.6C8.2 8.8 6 8.4 4.8 9c.9 1.8 3 2.6 4.9 1.6Z"/>' +
         '<path class="oak-leaf" d="M9.8 9.9c1.4-2 3.6-2.7 5.1-2.2-.8 2-3 3-5.1 2.2Z"/>' },
-    { at: 3, label: 'An oak sapling from a forgotten acorn',
+    { at: 2, label: 'An oak sapling from a forgotten acorn',
       art: '<path class="oak-ground" d="M3 17.7c4.6-.5 9.4-.6 14 0"/>' +
         '<path d="M10 17.6c.2-4.4-.2-9 .4-13.4"/>' +
         '<path class="oak-leaf" d="M10 13.2c-1.8-.4-3.6-1.6-4-3.2 1.8-.4 3.4.8 4 3.2Z"/>' +
         '<path class="oak-leaf" d="M10.1 10.6c1.6-.8 3.6-1 4.8-.2-1.2 1.4-3 1.6-4.8.2Z"/>' +
         '<path class="oak-leaf" d="M10.2 7.4c-1.4-.6-2.6-1.8-2.8-3.2 1.6 0 2.6 1.4 2.8 3.2Z"/>' +
         '<path class="oak-leaf" d="M10.4 5.2c.6-1.4 1.8-2.4 3.2-2.4-.4 1.6-1.6 2.4-3.2 2.4Z"/>' },
-    { at: 5, label: 'A young oak, grown from forgotten acorns. Click it to shake it',
+    { at: 3, label: 'A young oak, grown from forgotten acorns. Click it to shake it',
       art: '<path class="oak-ground" d="M2.6 17.7c5-.5 9.8-.6 14.8 0"/>' +
         '<path d="M10 17.6c.3-2.2.1-4.2-.3-6.4M9.9 13.6l-1.9-1.7M10 12.7l1.7-1.3"/>' +
         '<path class="oak-leaf" d="M5 10.4C3.6 10 3.2 8 4.6 7.2 4.4 5.4 6.2 4.4 7.6 5.2 8.2 3.6 10.6 3.2 11.8 4.6 13.2 3.8 15.2 4.8 15 6.6 16.6 7.2 16.6 9.4 15 10.2 14.6 11.6 12.6 12 11.6 11.2 10.6 12.2 8.6 12.2 7.8 11.2 6.6 11.8 5.2 11.6 5 10.4Z"/>' +
@@ -810,7 +755,7 @@
 
   let oakObserver = null;
   function renderOak() {
-    const host = footer && footer.querySelector('.wrap > :last-child');
+    const host = nav.querySelector('.nav-links');
     if (!host) return;
     const stageIndex = oakStage(tripCount());
     let oak = host.querySelector('.oak');
@@ -938,16 +883,7 @@
   }
 
   /* ---------------- Keyboard and shakes ---------------- */
-  const FLIP = 'arrowleft arrowright arrowleft arrowright';
-  let recentMoves = [];
   let typed = '';
-
-  function pushMove(move) {
-    recentMoves = recentMoves.concat(move).slice(-4);
-    if (recentMoves.join(' ') !== FLIP) return;
-    recentMoves = [];
-    perform('flip', backflip);
-  }
 
   function isEditable(target) {
     return target && (target.isContentEditable ||
@@ -962,7 +898,6 @@
     }
     if (event.ctrlKey || event.metaKey || event.altKey || isEditable(event.target)) return;
     const key = String(event.key || '').toLowerCase();
-    pushMove(key);
     if (key.length !== 1 || key < 'a' || key > 'z') return;
     typed = (typed + key).slice(-12);
     if (/(acorn|squirrel)$/.test(typed)) {
