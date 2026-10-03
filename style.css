@@ -132,7 +132,6 @@ h1.name, h1.page-title {
   width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block;
   border-radius: 6px; border: 1px solid var(--line);
   background: var(--husk);
-  box-shadow: 0 18px 40px -22px var(--shadow), 0 2px 6px -2px rgba(43,33,24,.18);   /* 사진 아래 옅은 음영 */
 }
 .portrait-empty {
   display: flex; align-items: center; justify-content: center;
@@ -297,19 +296,18 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   white-space: nowrap; border: 0;
 }
 .squirrel-stage {
-  /* A small illustrated squirrel, drawn lightly: a soft brown pencil outline with
-     small breaks and a second faint pass, warm colour laid a little off the line
-     so paper shows at the edges, and visible colour-pencil strokes. It keeps the
-     same colours in both themes, like a sticker on the page. */
-  --sq-ink: #4A3626;
+  /* Sunwoo's squirrel, as a coloured-pencil sketch: a dark-brown outline with a
+     faint second pass, warm colour laid a touch off the line, a sage belly and a
+     colour-pencil grain. Same colours in both themes, like a sticker on the page. */
+  --sq-ink: #3B2B1F;
   --sq-paper: #FFFFFF;
-  --sq-wash: #B37B47;
-  --sq-wash-o: .58;
-  --sq-belly: #F6EBD9;
+  --sq-wash: #B98250;
+  --sq-wash-o: .82;
+  --sq-belly: #D9D8B6;
   --sq-blush: #9E4B26;
-  --sq-blush-o: .18;
-  --sq-tex: #7A4C28;
-  --sq-tex-o: .32;
+  --sq-blush-o: .2;
+  --sq-tex: #6B4428;
+  --sq-tex-o: .22;
   --sq-nut: #E2B57E;
   --sq-nut-cap: #7A4C28;
   --sq-scarf: var(--leaf);
@@ -320,14 +318,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   color: var(--acorn);
 }
 :root[data-theme="dark"] .squirrel-stage {
-  --sq-ink: #3A2A1E;
+  --sq-ink: #2A1D13;
   --sq-paper: #F4ECE1;
   --sq-wash: #C08A55;
-  --sq-wash-o: .7;
-  --sq-belly: #F2E4CC;
-  --sq-blush-o: .2;
-  --sq-tex: #6B4428;
-  --sq-tex-o: .3;
+  --sq-wash-o: .88;
+  --sq-belly: #D4D3AF;
+  --sq-blush-o: .22;
+  --sq-tex: #5C3A1E;
+  --sq-tex-o: .22;
 }
 .squirrel-stage * { pointer-events: none !important; }
 /* Only the squirrel itself and its hint slip take clicks; the rest of the
@@ -353,7 +351,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 
 /* Drawing layers */
 .squirrel-art .sq-paper { fill: var(--sq-paper); }
-.squirrel-art .sq-wash { fill: var(--sq-wash); opacity: var(--sq-wash-o); transform: translate(2.2px, 1.8px); }
+.squirrel-art .sq-wash { fill: var(--sq-wash); opacity: var(--sq-wash-o); transform: translate(1px, .8px); }
+/* traced ink lines, plus a faint second pass a hair off, like a pencil going over a line twice */
+.squirrel-art .sq-ink { fill: var(--sq-ink); }
+.squirrel-art .sq-ink-ghost { opacity: .28; transform: translate(.8px, -.6px); }
 .squirrel-art .sq-belly { fill: var(--sq-belly); }
 .squirrel-art .sq-blush { fill: var(--sq-blush); opacity: var(--sq-blush-o); }
 .squirrel-art .sq-shade { fill: var(--sq-ink); opacity: .2; }
@@ -364,14 +365,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   fill: none; stroke: var(--sq-ink);
   stroke-linecap: round; stroke-linejoin: round;
 }
-.squirrel-art .sq-line { stroke-width: 1.6; opacity: .92; stroke-dasharray: 38 2.2 16 1.8 54 2.6 24 2; }
-.squirrel-art .sq-thin { stroke-width: 1.3; }
-.squirrel-art .sq-fine { stroke-width: .85; opacity: .92; }
-.squirrel-art .sq-mark { stroke-width: 1.15; opacity: .92; }
+.squirrel-art .sq-line { stroke-width: 1.25; }
+.squirrel-art .sq-thin { stroke-width: 1.05; }
+.squirrel-art .sq-fine { stroke-width: .9; }
+.squirrel-art .sq-mark { stroke-width: 1.35; }
 .squirrel-art .sq-faint { opacity: .4; }
 .squirrel-art .sq-texture { stroke: var(--sq-tex); stroke-width: .55; opacity: var(--sq-tex-o); }
-.squirrel-art .sq-hatch { stroke-width: .6; opacity: .4; }
-.squirrel-art .sq-ghost { stroke-width: .8; opacity: .38; }
+.squirrel-art .sq-hatch { stroke-width: .6; opacity: .22; }
+.squirrel-art .sq-ghost { stroke-width: .8; opacity: .18; }
 .squirrel-art .sq-whisker { stroke-width: .5; opacity: .4; }
 .squirrel-art .sq-ground { stroke-width: .9; opacity: .25; }
 .squirrel-art .sq-ink-fill { fill: var(--sq-ink); }
@@ -381,30 +382,23 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .squirrel-art .sq-held-icon { color: var(--sq-ink); }
 
 /* Rig: pivots for each moving part */
-.sq-tail { transform-origin: 48px 82px; }
-.sq-head { transform-origin: 80px 54px; }
-.sq-hind-near, .sq-hind-far { transform-origin: 57px 84px; }
-.sq-front-near, .sq-front-far { transform-origin: 81px 86px; }
-.sq-arm { transform-origin: 80px 64px; }
-.sq-eye { transform-origin: 96.2px 37.2px; }
-.sq-scarf-end { transform-origin: 77px 59px; }
+.sq-tail { transform-origin: 59px 82px; }
+.sq-head { transform-origin: 77px 45px; }
+.sq-hind-near { transform-origin: 75px 96.5px; }
+.sq-hind-far { transform-origin: 89.6px 87.6px; }
+.sq-arm { transform-origin: 91px 52px; }
+.sq-eye { transform-origin: 84px 36px; }
+.sq-scarf-end { transform-origin: 68px 48px; }
 
-/* Poses. Four limbs at most: sitting, it shows its hind feet and a paw at its
-   chest; running free it drops onto all fours; carrying, it runs on its hind
-   legs with the acorn held in both paws. */
-.sq-reach, .sq-carried-acorn, .sq-holding-paw, .sq-front-near, .sq-front-far,
-.sq-scarf, .sq-exclaim, .sq-zzz, .sq-yawn { opacity: 0; }
-.squirrel-actor.is-running:not(.is-carrying) .sq-front-near,
-.squirrel-actor.is-running:not(.is-carrying) .sq-front-far { opacity: 1; }
-.squirrel-actor.is-running:not(.is-carrying) .sq-arm { opacity: 0; }
+/* Poses. It sits with both front paws up at its chest; it hops on its hind feet
+   when it runs; reaching, one paw goes up to the button; carrying, the acorn sits
+   between its paws. */
+.sq-reach, .sq-carried-acorn, .sq-scarf, .sq-exclaim, .sq-zzz, .sq-yawn { opacity: 0; }
 .squirrel-actor.is-winter .sq-scarf { opacity: 1; }
-.squirrel-actor.is-carrying .sq-carried-acorn,
-.squirrel-actor.is-carrying .sq-holding-paw { opacity: 1; }
-.squirrel-actor.is-carrying .sq-arm { opacity: 0; }
+.squirrel-actor.is-carrying .sq-carried-acorn { opacity: 1; }
 .squirrel-actor.is-reaching .sq-reach { opacity: 1; }
-.squirrel-actor.is-reaching .sq-arm,
-.squirrel-actor.is-reaching .sq-holding-paw { opacity: 0; }
-.squirrel-actor.is-reaching .sq-head { transform: rotate(-24deg); }
+.squirrel-actor.is-reaching .sq-arm { opacity: 0; }
+.squirrel-actor.is-reaching .sq-head { transform: rotate(-20deg); }
 .squirrel-actor.is-peeking .sq-ground { opacity: 0; }
 
 .squirrel-actor.is-running .sq-hind-near,
@@ -434,12 +428,9 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .squirrel-actor.is-frozen * { animation-play-state: paused !important; }
 .squirrel-actor.is-noticing .sq-head { transform: rotate(-9deg); transition: transform .15s ease-out; }
 /* Presenting a hint: sitting up, both paws around the acorn. */
-.squirrel-actor.is-presenting .sq-holding-paw { opacity: 1; }
-.squirrel-actor.is-presenting .sq-arm,
 .squirrel-actor.is-presenting .sq-reach,
-.squirrel-actor.is-presenting .sq-carried-acorn,
-.squirrel-actor.is-presenting .sq-front-near,
-.squirrel-actor.is-presenting .sq-front-far { opacity: 0 !important; }
+.squirrel-actor.is-presenting .sq-carried-acorn { opacity: 0 !important; }
+.squirrel-actor.is-presenting .sq-arm { opacity: 1 !important; }
 .squirrel-actor.is-presenting .sq-hind-near,
 .squirrel-actor.is-presenting .sq-hind-far,
 .squirrel-actor.is-presenting .sq-tail { animation: none !important; transform: none; }
