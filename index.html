@@ -115,9 +115,12 @@
       Rotate a Sudoku board and a person sees the same puzzle; a language model that just solved it
       <a href="#logical-equivariance">often fails</a>. A person knows where a thrown ball will land
       without picturing every instant in between; most world models still
-      <a href="#nesp">generate every frame</a>. I study where gaps like these come from and how to
-      close them: in how <strong>diffusion language models</strong> reason and learn from little
-      data, and in <strong>world models for embodied agents</strong>.
+      <a href="#nesp">generate every frame</a>.
+    </p>
+    <p>
+      People reason instead of matching patterns, learn from very little, and act in a physical
+      world they understand. I work on bringing models closer to each: reasoning, efficient
+      learning, and world models for embodied agents.
     </p>
   </div>
 </header>
@@ -254,62 +257,44 @@
   </div>
 </section>
 
-<!-- ================= GET IN TOUCH =================
-     "Close the gap", drawn: two banks, stepping stones between them. Each stone is a
-     line of work and links to its paper; the dashed stone is the one being laid now. -->
+<!-- ================= CLOSING THE GAP =================
+     소개글의 "close the gap"을 그림으로 옮긴 것: 두 기슭과 그 사이의 디딤돌 셋.
+     돌마다 연구의 한 갈래이고, 논문 이름을 누르면 위쪽 카드로 갑니다. 점선 돌은 지금 놓는 중입니다. -->
 <section id="contact">
   <div class="wrap">
-    <h2>Get in touch</h2>
-    <figure class="gap">
-      <svg class="gap-scene" viewBox="0 0 800 160" aria-hidden="true" focusable="false">
-        <defs>
-          <filter id="gap-rough" x="-2%" y="-10%" width="104%" height="120%" color-interpolation-filters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="7"/>
-            <feDisplacementMap in="SourceGraphic" scale="2.4" xChannelSelector="R" yChannelSelector="G"/>
-          </filter>
-        </defs>
-        <g filter="url(#gap-rough)">
-          <!-- water -->
-          <path class="gap-water" d="M150 122c25-4 45 4 70 0s45-4 70 0 45 4 70 0 45-4 70 0 45 4 70 0 45-4 70 0 45 4 70 0"/>
-          <path class="gap-water faint" d="M168 138c22-3 40 3 62 0s40-3 62 0 40 3 62 0 40-3 62 0 40 3 62 0 40-3 62 0 40 3 62 0"/>
-          <path class="gap-water faint" d="M190 153c20-3 36 3 56 0s36-3 56 0 36 3 56 0 36-3 56 0 36 3 56 0 36-3 56 0"/>
-          <!-- left bank: what models can do -->
-          <path class="gap-earth" d="M0 62C40 58 92 62 128 70C150 76 164 96 172 124C174 132 174 140 170 146C140 150 110 144 80 149C52 153 26 146 0 150Z"/>
-          <path class="gap-hatch" d="M138 86l-14 14M150 92l-18 18M158 102l-20 20M164 114l-20 20M168 128l-14 14"/>
-          <path class="gap-ink" d="M0 62C40 58 92 62 128 70C150 76 164 96 172 124"/>
-          <path class="gap-grass" d="M22 60l-2-7M26 60l2-6M64 60l-1-8M69 61l3-6M104 64l-2-7M108 65l2-6"/>
-          <!-- stones -->
-          <g class="gap-stone" data-stone="efficiency">
-            <path class="gap-rock" d="M198 124C200 104 220 92 240 92C262 92 280 104 282 124Z"/>
-            <path class="gap-hatch" d="M262 102l-10 18M272 108l-8 14"/>
-            <path class="gap-ink" d="M198 124C200 104 220 92 240 92C262 92 280 104 282 124"/>
-          </g>
-          <g class="gap-stone" data-stone="reasoning">
-            <path class="gap-rock" d="M356 124C358 102 378 88 400 88C424 88 442 102 444 124Z"/>
-            <path class="gap-hatch" d="M424 98l-10 20M434 106l-8 16"/>
-            <path class="gap-ink" d="M356 124C358 102 378 88 400 88C424 88 442 102 444 124"/>
-          </g>
-          <g class="gap-stone is-laying" data-stone="world-models">
-            <path class="gap-ink dashed" d="M518 124C520 104 540 92 560 92C582 92 600 104 602 124"/>
-          </g>
-          <!-- right bank: what people do easily -->
-          <path class="gap-earth" d="M800 62C760 58 708 62 672 70C650 76 636 96 628 124C626 132 626 140 630 146C660 150 690 144 720 149C748 153 774 146 800 150Z"/>
-          <path class="gap-hatch" d="M662 86l14 14M650 92l18 18M642 102l20 20M636 114l20 20M632 128l14 14"/>
-          <path class="gap-ink" d="M800 62C760 58 708 62 672 70C650 76 636 96 628 124"/>
-          <path class="gap-grass" d="M778 60l2-7M774 60l-2-6M736 60l1-8M731 61l-3-6M696 64l2-7M692 65l-2-6"/>
-        </g>
+    <h2>Closing the gap</h2>
+    <figure class="gap-map">
+      <svg viewBox="0 26 520 206" role="img"
+           aria-label="A gap between what models can do and what people do easily, crossed by three stepping stones: reasoning, efficient learning, and world models. The third stone is still being laid.">
+        <!-- 두 기슭 -->
+        <path class="gm-bank" d="M0 113 C16 110 32 115 48 112 C60 110 72 113 82 112 C86 140 79 178 84 228 L0 228 Z"/>
+        <path class="gm-bank" d="M520 73 C504 70 488 75 472 72 C462 70 454 73 446 72 C442 112 450 170 444 228 L520 228 Z"/>
+        <path class="gm-hatch" d="M10 134 l13 -8 M26 152 l14 -9 M8 174 l13 -8 M42 186 l13 -8 M18 206 l14 -9 M54 142 l12 -8 M56 214 l12 -8"/>
+        <path class="gm-hatch" d="M462 98 l13 -8 M486 116 l14 -9 M500 96 l12 -8 M466 150 l13 -8 M492 172 l14 -9 M470 200 l13 -8 M500 138 l12 -8"/>
+        <!-- 물결 -->
+        <path class="gm-water" d="M98 222 q8 -5 16 0 t16 0 M168 225 q8 -5 16 0 t16 0 M238 221 q8 -5 16 0 t16 0 M308 225 q8 -5 16 0 t16 0 M378 222 q8 -5 16 0 t16 0"/>
+        <!-- 건너가는 길 -->
+        <path class="gm-route" d="M74 108 Q108 88 140 136 M160 136 Q204 90 250 114 M270 114 Q322 66 370 92 M392 92 Q418 50 452 66"/>
+        <path class="gm-arrow" d="M443 58 L453 66 L441 71"/>
+        <!-- 디딤돌 셋: 마지막 돌은 아직 놓는 중이라 점선 -->
+        <path class="gm-stone" data-stone="reasoning" d="M120 151 C122 142 136 139 152 140 C168 141 180 145 180 152 C180 160 167 163 149 163 C133 163 118 159 120 151 Z"/>
+        <path class="gm-stone" data-stone="efficient-learning" d="M230 129 C232 120 246 117 262 118 C278 119 290 123 290 130 C290 138 277 141 259 141 C243 141 228 137 230 129 Z"/>
+        <path class="gm-stone gm-stone-next" data-stone="world-models" d="M350 107 C352 98 366 95 382 96 C398 97 410 101 410 108 C410 116 397 119 379 119 C363 119 348 115 350 107 Z"/>
+        <!-- 이름표 -->
+        <text class="gm-side" x="41" y="84" text-anchor="middle">what models</text>
+        <text class="gm-side" x="41" y="100" text-anchor="middle">can do</text>
+        <text class="gm-side" x="483" y="44" text-anchor="middle">what people</text>
+        <text class="gm-side" x="483" y="60" text-anchor="middle">do easily</text>
+        <text class="gm-axis" x="150" y="185" text-anchor="middle">reasoning</text>
+        <a href="#logical-equivariance" data-card="logical-equivariance" data-stone="reasoning"><text class="gm-paper" x="150" y="200" text-anchor="middle">Logical Equivariance</text></a>
+        <text class="gm-axis" x="260" y="163" text-anchor="middle">efficient learning</text>
+        <a href="#pivot-sd" data-card="pivot-sd" data-stone="efficient-learning"><text class="gm-paper" x="259" y="178" text-anchor="end">Pivot-SD</text></a>
+        <text class="gm-paper gm-sep" x="259" y="178">,</text>
+        <a href="#klass" data-card="klass" data-stone="efficient-learning"><text class="gm-paper" x="265" y="178">KLASS</text></a>
+        <text class="gm-axis" x="380" y="141" text-anchor="middle">world models</text>
+        <a href="#nesp" data-card="nesp" data-stone="world-models"><text class="gm-paper" x="380" y="156" text-anchor="middle">next-event prediction</text></a>
       </svg>
-      <ol class="gap-labels">
-        <li class="gap-bank">what models can do</li>
-        <li class="gap-step" data-stone="efficiency"><span class="gap-word">efficiency</span>
-          <span class="gap-papers"><a href="#klass" data-card="klass">KLASS</a>, <a href="#pivot-sd" data-card="pivot-sd">Pivot-SD</a></span></li>
-        <li class="gap-step" data-stone="reasoning"><span class="gap-word">reasoning</span>
-          <span class="gap-papers"><a href="#logical-equivariance" data-card="logical-equivariance">Logical Equivariance</a></span></li>
-        <li class="gap-step" data-stone="world-models"><span class="gap-word">world models</span>
-          <span class="gap-papers"><a href="#nesp" data-card="nesp">Do World Models Need Clocks?</a></span></li>
-        <li class="gap-bank">what people do easily</li>
-      </ol>
-      <figcaption>Each stone is a line of my work. The dashed one is the stone I am laying now.</figcaption>
+      <figcaption>Two stones are in place. The third is the one I am laying now.</figcaption>
     </figure>
     <p class="gap-invite">If you are working on one of these gaps, or want to, I would be glad to talk:
       <a href="mailto:sunwoo@kaist.ac.kr">sunwoo@kaist.ac.kr</a></p>
@@ -320,10 +305,10 @@
 <section id="about-me">
   <div class="wrap">
     <h2>About me</h2>
-    <p>Outside research, I like watching trees and clouds. My favorite films are <em>WALL-E</em> and
+    <p>Outside research, I play the drums and like watching trees and clouds. My favorite films are <em>WALL-E</em> and
       <em>Boyhood</em>; for music, Pachelbel's Canon, the Beach Boys' <em>Pet Sounds</em>, and U2's <em>The Joshua Tree</em>.
-      In high school, on a trip to Boston, I walked into a Harvard lecture and stayed for the whole class
-      (I understood almost none of it).</p>
+      In high school, on a trip to Boston, I snuck into a Harvard lecture. I understood almost none of it.
+      Judging by the faces around me, I was not alone.</p>
   </div>
 </section>
 
@@ -389,10 +374,9 @@
 <!-- 간극의 디딤돌: 논문 이름에 마우스를 올리거나 키보드로 고르면 그 돌이 살짝 떠오르고 위쪽 논문 카드도 표시됩니다 -->
 <script>
 (function () {
-  document.querySelectorAll('.gap-labels a[data-card]').forEach(function (link) {
+  document.querySelectorAll('.gap-map a[data-card]').forEach(function (link) {
     var card = document.getElementById(link.dataset.card);
-    var step = link.closest('[data-stone]');
-    var stone = step && document.querySelector('.gap-stone[data-stone="' + step.dataset.stone + '"]');
+    var stone = document.querySelector('.gm-stone[data-stone="' + link.dataset.stone + '"]');
     function on() { if (card) card.classList.add('is-pointed'); if (stone) stone.classList.add('is-lit'); }
     function off() { if (card) card.classList.remove('is-pointed'); if (stone) stone.classList.remove('is-lit'); }
     link.addEventListener('mouseenter', on); link.addEventListener('mouseleave', off);
