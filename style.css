@@ -103,9 +103,15 @@ p { margin: 0 0 14px; }
 .theme-toggle:hover { color: var(--cap); background: var(--husk); }
 .theme-toggle:focus-visible { outline: 2px solid var(--acorn); outline-offset: 2px; }
 .theme-toggle svg { width: 17px; height: 17px; display: block; }
+#denoise-btn svg { width: 20px; height: 20px; }
 .theme-toggle .icon-sun { display: none; }
 :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 :root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+
+/* 디노이징 효과의 단어 조각 */
+.tok { border-radius: 3px; transition: color .25s ease, background-color .25s ease; }
+.tok.masked { color: transparent; background: var(--line); }
+.tok.fresh { color: var(--acorn); }
 
 /* ================= TOP (이름 · 소개 · 사진) ================= */
 .top {
@@ -227,7 +233,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   .role { margin-bottom: 20px; }
   .top-side { margin-bottom: 22px; }
   .portrait { max-width: 220px; }
-  .nav-links { gap: 14px; }
+  .nav-links { gap: 12px; }
   .nav-links a { font-size: .88rem; }
   .news li { grid-template-columns: 78px minmax(0, 1fr); column-gap: 12px; }
   .page-head { padding-top: 36px; }
