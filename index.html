@@ -107,86 +107,61 @@
   <div class="wrap">
     <h2>Selected papers <a href="publications.html">[full list]</a></h2>
     <p class="pub-legend">* equal contribution</p>
-    <!-- 카드 왼쪽 그림은 figs/ 폴더의 파일입니다. 파일이 없으면 글만 있는 카드로 보입니다 -->
+    <!-- ↓ 논문 카드 하나 복사해서 개수를 늘리세요 -->
 
     <article class="pub" id="pivot-sd">
-      <figure class="pub-fig">
-        <img src="figs/pivot-sd.png" alt="Entropy heatmap of a denoising trajectory with the selected pivot steps marked" onerror="this.closest('.pub').classList.add('no-fig')" />
-      </figure>
-      <div class="pub-body">
-        <span class="pub-badge award">Oral presentation</span>
-        <h3 class="pub-title">Pivot-SD: Efficient Self-Distillation for Masked Diffusion Language Models</h3>
-        <p class="pub-authors">Seo Hyun Kim*, <span class="me">Sunwoo Hong*</span>, Younwoo Choi, Chen-Hao Chao, Se-Young Yun, Rahul G. Krishnan</p>
-        <p class="pub-venue">EMNLP 2026, Main Conference</p>
-        <p class="pub-desc">A masked diffusion language model can be post-trained on under 4% of its tokens. Supervising only the few commitments that most reduce uncertainty beats full-sequence fine-tuning and online RL at a fraction of the compute.</p>
-        <div class="pub-links">
-          <a href="pivot-sd/">Project</a>
-        </div>
+      <span class="pub-badge award">Oral presentation</span>
+      <h3 class="pub-title">Pivot-SD: Efficient Self-Distillation for Masked Diffusion Language Models</h3>
+      <p class="pub-authors">Seo Hyun Kim*, <span class="me">Sunwoo Hong*</span>, Younwoo Choi, Chen-Hao Chao, Se-Young Yun, Rahul G. Krishnan</p>
+      <p class="pub-venue">EMNLP 2026, Main Conference</p>
+      <p class="pub-desc">A masked diffusion language model can be post-trained on under 4% of its tokens. Supervising only the few commitments that most reduce uncertainty beats full-sequence fine-tuning and online RL at a fraction of the compute.</p>
+      <div class="pub-links">
+        <a href="pivot-sd/">Project</a>
       </div>
     </article>
 
     <article class="pub" id="klass">
-      <figure class="pub-fig">
-        <img src="figs/klass.pdf" alt="Overview figure of KLASS" onerror="this.closest('.pub').classList.add('no-fig')" />
-      </figure>
-      <div class="pub-body">
-        <span class="pub-badge award">Spotlight, top 3.2%</span>
-        <h3 class="pub-title">KLASS: KL-Guided Fast Inference in Masked Diffusion Models</h3>
-        <p class="pub-authors">Seo Hyun Kim*, <span class="me">Sunwoo Hong*</span>, Hojung Jung, Youngrok Park, Se-Young Yun</p>
-        <p class="pub-venue">NeurIPS 2025</p>
-        <p class="pub-desc">A training-free sampler that uses the KL divergence between denoising steps to find tokens that are safe to unmask in parallel. Up to 2.78× faster generation while improving over greedy decoding, across text, image, and molecular generation.</p>
-        <div class="pub-links">
-          <a href="https://arxiv.org/abs/2511.05664" target="_blank" rel="noopener">arXiv</a>
-          <a href="https://github.com/shkim0116/KLASS" target="_blank" rel="noopener">Code</a>
-        </div>
+      <span class="pub-badge award">Spotlight, top 3.2%</span>
+      <h3 class="pub-title">KLASS: KL-Guided Fast Inference in Masked Diffusion Models</h3>
+      <p class="pub-authors">Seo Hyun Kim*, <span class="me">Sunwoo Hong*</span>, Hojung Jung, Youngrok Park, Se-Young Yun</p>
+      <p class="pub-venue">NeurIPS 2025</p>
+      <p class="pub-desc">A training-free sampler that uses the KL divergence between denoising steps to find tokens that are safe to unmask in parallel. Up to 2.78× faster generation while improving over greedy decoding, across text, image, and molecular generation.</p>
+      <div class="pub-links">
+        <a href="https://arxiv.org/abs/2511.05664" target="_blank" rel="noopener">arXiv</a>
+        <a href="https://github.com/shkim0116/KLASS" target="_blank" rel="noopener">Code</a>
       </div>
     </article>
 
     <article class="pub" id="logical-equivariance">
-      <figure class="pub-fig">
-        <img src="figs/logical-equivariance.png" alt="A Sudoku board solved correctly, and the same board rotated by 90 degrees solved incorrectly" onerror="this.closest('.pub').classList.add('no-fig')" />
-      </figure>
-      <div class="pub-body">
-        <span class="pub-badge">Under review</span>
-        <h3 class="pub-title">Logical Equivariance in Diffusion Language Models</h3>
-        <p class="pub-authors"><span class="me">Sunwoo Hong*</span>, Seo Hyun Kim*, Chen-Hao Chao, Younwoo Choi, Se-Young Yun, Rahul G. Krishnan</p>
-        <p class="pub-venue">Under review. Earlier version at the ICML 2026 Workshop on Foundations of Deep Generative Models</p>
-        <p class="pub-desc">Accuracy on one presentation of a problem hides failures on logically equivalent ones. We measure whether correctness survives answer-preserving rewrites, and a post-training recipe raises the all-view correctness of LLaDA-8B from 47.7% to 86.1%.</p>
-        <div class="pub-links">
-          <a href="https://openreview.net/forum?id=BC3jb6452Y" target="_blank" rel="noopener">OpenReview</a>
-        </div>
+      <span class="pub-badge">Under review</span>
+      <h3 class="pub-title">Logical Equivariance in Diffusion Language Models</h3>
+      <p class="pub-authors"><span class="me">Sunwoo Hong*</span>, Seo Hyun Kim*, Chen-Hao Chao, Younwoo Choi, Se-Young Yun, Rahul G. Krishnan</p>
+      <p class="pub-venue">Under review. Earlier version at the ICML 2026 Workshop on Foundations of Deep Generative Models</p>
+      <p class="pub-desc">Accuracy on one presentation of a problem hides failures on logically equivalent ones. We measure whether correctness survives answer-preserving rewrites, and a post-training recipe raises the all-view correctness of LLaDA-8B from 47.7% to 86.1%.</p>
+      <div class="pub-links">
+        <a href="https://openreview.net/forum?id=BC3jb6452Y" target="_blank" rel="noopener">OpenReview</a>
       </div>
     </article>
 
     <article class="pub" id="route-guided">
-      <figure class="pub-fig">
-        <img src="figs/route-guided.png" alt="A robot arm whose planned path is blocked by an obstacle, and candidate routes around it" onerror="this.closest('.pub').classList.add('no-fig')" />
-      </figure>
-      <div class="pub-body">
-        <span class="pub-badge">Workshop</span>
-        <h3 class="pub-title">Route-Guided CBF-QP Repair for Safe Vision-Language-Action Models</h3>
-        <p class="pub-authors">Chan Park, <span class="me">Sunwoo Hong</span>, Kirak Kim, Yoonjeong Park, Alexander W. Olson, Ali Pesaranghader</p>
-        <p class="pub-venue">RSS 2026 Workshop on Trustworthy Embodied Foundation Models</p>
-        <p class="pub-desc">A repair module that adds route guidance to a CBF-QP safety filter, so a vision-language-action policy can rejoin its task trajectory after avoiding an obstacle.</p>
-        <div class="pub-links">
-          <a href="https://ckck12.github.io/Route-Guied-CBF-QP/paper.pdf" target="_blank" rel="noopener">PDF</a>
-          <a href="https://ckck12.github.io/Route-Guied-CBF-QP/" target="_blank" rel="noopener">Project</a>
-          <a href="https://github.com/Ckck12/Route-Guied-CBF-QP" target="_blank" rel="noopener">Code</a>
-        </div>
+      <span class="pub-badge">Workshop</span>
+      <h3 class="pub-title">Route-Guided CBF-QP Repair for Safe Vision-Language-Action Models</h3>
+      <p class="pub-authors">Chan Park, <span class="me">Sunwoo Hong</span>, Kirak Kim, Yoonjeong Park, Alexander W. Olson, Ali Pesaranghader</p>
+      <p class="pub-venue">RSS 2026 Workshop on Trustworthy Embodied Foundation Models</p>
+      <p class="pub-desc">A repair module that adds route guidance to a CBF-QP safety filter, so a vision-language-action policy can rejoin its task trajectory after avoiding an obstacle.</p>
+      <div class="pub-links">
+        <a href="https://ckck12.github.io/Route-Guied-CBF-QP/paper.pdf" target="_blank" rel="noopener">PDF</a>
+        <a href="https://ckck12.github.io/Route-Guied-CBF-QP/" target="_blank" rel="noopener">Project</a>
+        <a href="https://github.com/Ckck12/Route-Guied-CBF-QP" target="_blank" rel="noopener">Code</a>
       </div>
     </article>
 
     <!-- 제출 후에는 배지를 "Under review"로 바꾸세요 -->
     <article class="pub" id="nesp">
-      <figure class="pub-fig">
-        <img src="figs/nesp.png" alt="Overview figure of next-event state prediction" onerror="this.closest('.pub').classList.add('no-fig')" />
-      </figure>
-      <div class="pub-body">
-        <span class="pub-badge">In preparation</span>
-        <h3 class="pub-title">Do World Models Need Clocks? Next-Event State Prediction for Physical Planning</h3>
-        <p class="pub-authors"><span class="me">Sunwoo Hong</span></p>
-        <p class="pub-desc">A world model that predicts the next physical event, its elapsed time, and the resulting state for each candidate action, instead of rolling out fixed-interval frames.</p>
-      </div>
+      <span class="pub-badge">In preparation</span>
+      <h3 class="pub-title">Do World Models Need Clocks? Next-Event State Prediction for Physical Planning</h3>
+      <p class="pub-authors"><span class="me">Sunwoo Hong</span></p>
+      <p class="pub-desc">A world model that predicts the next physical event, its elapsed time, and the resulting state for each candidate action, instead of rolling out fixed-interval frames.</p>
     </article>
   </div>
 </section>
