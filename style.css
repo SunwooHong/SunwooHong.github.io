@@ -25,6 +25,7 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+[id] { scroll-margin-top: 64px; }   /* 상단 메뉴에 가리지 않도록 */
 
 body {
   margin: 0;
@@ -125,7 +126,6 @@ h2 a { font-family: var(--sans); font-size: .9rem; font-weight: 400; letter-spac
 /* ================= PUBLICATION CARDS (index.html) ================= */
 .pub-legend { font-size: .9rem; color: var(--muted); margin: -6px 0 16px; }
 .pub {
-  display: grid; grid-template-columns: 200px minmax(0, 1fr); column-gap: 22px; align-items: start;
   border: 1px solid var(--line); border-radius: 12px; background: var(--paper);
   padding: 20px 22px; margin-bottom: 16px;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
@@ -135,16 +135,6 @@ h2 a { font-family: var(--sans); font-size: .9rem; font-weight: 400; letter-spac
   box-shadow: 0 14px 30px -20px rgba(92,58,30,.55);
   border-color: #D9CBB8;
 }
-/* 왼쪽 그림: figs/ 폴더에 파일이 없으면 자동으로 글만 있는 카드가 됩니다 */
-.pub-fig {
-  margin: 2px 0 0; aspect-ratio: 4 / 3;
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--line); border-radius: 8px; background: #fff; overflow: hidden;
-}
-.pub-fig img { max-width: 100%; max-height: 100%; display: block; }
-.pub.no-fig { grid-template-columns: minmax(0, 1fr); }
-.pub.no-fig .pub-fig { display: none; }
-
 .pub-badge {
   font-size: .78rem; font-weight: 600; color: var(--cap);
   background: var(--husk); border: 1px solid var(--line);
@@ -202,8 +192,6 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   .nav-links { gap: 16px; }
   .nav-links a { font-size: .88rem; }
   .news li { grid-template-columns: 78px minmax(0, 1fr); column-gap: 12px; }
-  .pub { grid-template-columns: minmax(0, 1fr); row-gap: 14px; }
-  .pub-fig { max-width: 260px; }
   .page-head { padding-top: 36px; }
 }
 @media (prefers-reduced-motion: reduce) {
