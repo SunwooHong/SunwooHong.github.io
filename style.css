@@ -15,12 +15,37 @@
   --leaf:   #55702F;   /* Oral / Spotlight 배지 (참나무 잎) */
   --leaf-bg:#EEF2E4;
   --leaf-line:#D5DEC0;
+  --line-strong:#D9CBB8; /* 카드 호버 테두리 */
+  --nav-bg: rgba(255,255,255,.9);
+  --on-accent:#FFFFFF;   /* 액센트 바탕 위의 글자 */
+  --shadow: rgba(92,58,30,.55);
+  color-scheme: light;
 
   --serif: "Newsreader", Georgia, "Times New Roman", serif;
   --sans:  "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --maxw: 840px;
   --gutter: 24px;
+}
+
+/* ---- 어두운 테마: 상단 메뉴의 달 아이콘을 누르면 적용됩니다 ---- */
+:root[data-theme="dark"] {
+  --paper:  #1C1612;   /* 짙은 월넛 */
+  --ink:    #F4ECE1;
+  --body:   #D8CCBE;
+  --muted:  #A49586;
+  --acorn:  #DDA56B;
+  --cap:    #F2C690;
+  --line:   #3A2F27;
+  --husk:   #2A211B;
+  --leaf:   #B9CF93;
+  --leaf-bg:#262E1F;
+  --leaf-line:#3F4B32;
+  --line-strong:#5A4A3D;
+  --nav-bg: rgba(28,22,18,.9);
+  --on-accent:#1C1612;
+  --shadow: rgba(0,0,0,.7);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -54,7 +79,7 @@ p { margin: 0 0 14px; }
 /* ================= NAV ================= */
 .nav {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(255,255,255,.9);
+  background: var(--nav-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
 }
@@ -68,6 +93,19 @@ p { margin: 0 0 14px; }
 .nav-links { display: flex; align-items: center; gap: 24px; margin-left: auto; }
 .nav-links a { font-size: .94rem; color: var(--muted); border: 0; }
 .nav-links a:hover, .nav-links a[aria-current="page"] { color: var(--cap); border: 0; }
+
+/* 테마 전환 버튼 */
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 0; margin-left: -6px;
+  background: none; border: 0; border-radius: 50%; cursor: pointer; color: var(--muted);
+}
+.theme-toggle:hover { color: var(--cap); background: var(--husk); }
+.theme-toggle:focus-visible { outline: 2px solid var(--acorn); outline-offset: 2px; }
+.theme-toggle svg { width: 17px; height: 17px; display: block; }
+.theme-toggle .icon-sun { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+:root[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 
 /* ================= TOP (이름 · 소개 · 사진) ================= */
 .top {
@@ -132,8 +170,8 @@ h2 a { font-family: var(--sans); font-size: .9rem; font-weight: 400; letter-spac
 }
 .pub:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px -20px rgba(92,58,30,.55);
-  border-color: #D9CBB8;
+  box-shadow: 0 14px 30px -20px var(--shadow);
+  border-color: var(--line-strong);
 }
 .pub-badge {
   font-size: .78rem; font-weight: 600; color: var(--cap);
@@ -155,7 +193,7 @@ h2 a { font-family: var(--sans); font-size: .9rem; font-weight: 400; letter-spac
   font-size: .85rem; color: var(--acorn);
   border: 1px solid var(--line); border-radius: 6px; padding: 1px 11px;
 }
-.pub-links a:hover { background: var(--acorn); color: #fff; border-color: var(--acorn); }
+.pub-links a:hover { background: var(--acorn); color: var(--on-accent); border-color: var(--acorn); }
 
 /* ================= FULL LISTS (publications.html, news.html) ================= */
 .page-head { padding-top: 56px; padding-bottom: 6px; }
@@ -189,7 +227,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   .role { margin-bottom: 20px; }
   .top-side { margin-bottom: 22px; }
   .portrait { max-width: 220px; }
-  .nav-links { gap: 16px; }
+  .nav-links { gap: 14px; }
   .nav-links a { font-size: .88rem; }
   .news li { grid-template-columns: 78px minmax(0, 1fr); column-gap: 12px; }
   .page-head { padding-top: 36px; }
