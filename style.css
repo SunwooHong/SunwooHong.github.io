@@ -504,6 +504,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   transition: clip-path .46s cubic-bezier(.2, .8, .2, 1) .34s;
 }
 .sq-fortune-text { margin: 0 0 4px; color: var(--ink); }
+.sq-fortune-note { margin: 0 0 6px; font: italic 13px/1.4 var(--serif); color: var(--muted); }
 .sq-fortune-check {
   display: inline-block; width: 14px; height: 14px; margin: 0 5px 0 0; vertical-align: -1px;
   fill: none; stroke: var(--leaf); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;

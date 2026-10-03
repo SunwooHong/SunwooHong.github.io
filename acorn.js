@@ -123,6 +123,7 @@
       <path d="M12 5.4c-.5-1.4-.1-2.5 1-3.1M8.3 7.5l1 1M11.5 7.1l1 1M14.7 7.5l1 1"/></g></svg>
   </div>
   <div class="sq-fortune-slip" hidden>
+    <p class="sq-fortune-note" hidden></p>
     <p class="sq-fortune-text"></p>
     <div class="sq-fortune-foot">
       <button type="button" class="sq-fortune-turn" data-step="-1" aria-label="Previous hint">
@@ -144,6 +145,7 @@
   const fortuneNut = stage.querySelector('.sq-fortune-nut');
   const fortuneSlip = stage.querySelector('.sq-fortune-slip');
   const fortuneText = stage.querySelector('.sq-fortune-text');
+  const fortuneNote = stage.querySelector('.sq-fortune-note');
   const fortuneCount = stage.querySelector('.sq-fortune-count');
   const fortuneTurns = Array.from(stage.querySelectorAll('.sq-fortune-turn'));
   const flyingIcon = sourceIcon.cloneNode(true);
@@ -164,7 +166,8 @@
     { id: 'seek', hint: 'Lend me the acorn, then scroll all the way down. I like to hide near the footer.' },
     { id: 'mood', hint: 'Visit after 11 pm, or sometime in winter. I dress for the occasion.' }
   ];
-  const ALL_FOUND = 'That’s all seven. You now know every secret I have, except where I buried last year’s acorns.';
+  // Once everything is found, this line sits above whichever hint is showing.
+  const ALL_FOUND = 'All seven found. The only secret left is where I buried last year’s acorns.';
 
   function foundSet() {
     try { return new Set(JSON.parse(readStore('localStorage', FOUND_KEY) || '[]')); } catch (_) { return new Set(); }
@@ -491,8 +494,8 @@
   /* ---------------- Clicking the squirrel: an acorn fortune ----------------
      The squirrel stops, holds out an acorn, the cap pops off and a paper slip
      unrolls with a hint it has not given before. Arrows on the slip (or the
-     arrow keys) turn back to every hint already handed out, so nothing is lost
-     once all of them have been found. */
+     arrow keys) turn back to every hint already handed out. Once all seven are
+     found, it hands them out again in order, numbered as always. */
   let fortuneOpen = false;
   let fortuneTimer = 0;
   let fortuneToken = 0;
@@ -518,21 +521,20 @@
         if (!found.has(item.id)) { egg = item; break; }
       }
     }
-    if (!egg) return null;
+    // All found: hand them out again in order, one per click.
+    if (!egg) egg = EGGS[hintCursor % EGGS.length];
     hintCursor = (EGGS.indexOf(egg) + 1) % EGGS.length;
     given.add(egg.id);
     writeStore('localStorage', HINTS_KEY, JSON.stringify(Array.from(given)));
     return egg;
   }
 
-  // Every hint handed out or egg found, in order, then the closing note.
+  // Every hint handed out or egg found, in order. Each page is one numbered hint.
   function buildPages() {
     const found = foundSet();
     const given = hintSet();
-    const pages = EGGS.filter(function (item) { return found.has(item.id) || given.has(item.id); })
+    return EGGS.filter(function (item) { return found.has(item.id) || given.has(item.id); })
       .map(function (item) { return { egg: item }; });
-    if (EGGS.every(function (item) { return found.has(item.id); })) pages.push({ final: true });
-    return pages;
   }
 
   function layoutSlip() {
@@ -553,14 +555,17 @@
     fortunePage = (index + fortunePages.length) % fortunePages.length;
     const page = fortunePages[fortunePage];
     const found = foundSet();
-    const isFound = !page.final && found.has(page.egg.id);
-    fortuneText.innerHTML = page.final ? ALL_FOUND : (isFound ? CHECK : '') + page.egg.hint;
+    const isFound = found.has(page.egg.id);
+    const allFound = EGGS.every(function (item) { return found.has(item.id); });
+    fortuneNote.hidden = !allFound;
+    fortuneNote.textContent = allFound ? ALL_FOUND : '';
+    fortuneText.innerHTML = (isFound ? CHECK : '') + page.egg.hint;
     // Each easter egg keeps its own number, so the count changes as you turn.
-    fortuneCount.textContent = page.final ? 'All ' + EGGS.length + ' found'
-      : 'Hint ' + (EGGS.indexOf(page.egg) + 1) + ' of ' + EGGS.length;
+    fortuneCount.textContent = 'Hint ' + (EGGS.indexOf(page.egg) + 1) + ' of ' + EGGS.length;
     fortuneTurns.forEach(function (turn) { turn.hidden = fortunePages.length < 2; });
     layoutSlip();
-    status.textContent = (isFound ? 'Found. ' : '') + fortuneText.textContent + ' ' + fortuneCount.textContent + '.';
+    status.textContent = (allFound ? ALL_FOUND + ' ' : '') + (isFound ? 'Found. ' : '') +
+      fortuneText.textContent + ' ' + fortuneCount.textContent + '.';
     clearTimeout(fortuneTimer);
     fortuneTimer = setTimeout(function () { closeFortune(); }, 14000);
   }
@@ -601,7 +606,7 @@
     fortuneSlip.style.visibility = 'hidden';
     fortuneSlip.hidden = false;
     fortuneNut.hidden = false;
-    showPage(egg ? fortunePages.findIndex(function (page) { return page.egg === egg; }) : fortunePages.length - 1);
+    showPage(Math.max(0, fortunePages.findIndex(function (page) { return page.egg === egg; })));
     fortuneSlip.style.visibility = '';
     void fortuneSlip.offsetWidth;
     fortuneNut.classList.add('is-open');
