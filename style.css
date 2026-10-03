@@ -284,12 +284,20 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   white-space: nowrap; border: 0;
 }
 .squirrel-stage {
-  /* Pen and wash: the page's own ink for lines, its paper behind them,
-     and one warm wash that is printed a little off the line. */
-  --sq-ink: var(--ink);
-  --sq-paper: var(--paper);
-  --sq-wash: #B9773F;
-  --sq-wash-opacity: .3;
+  /* A small illustrated squirrel: dark ink outline, flat warm colour printed a
+     little off the line, a colour-pencil texture and a few hatched shadows.
+     It keeps the same colours in both themes, like a sticker on the page. */
+  --sq-ink: #231A13;
+  --sq-paper: #FFFFFF;
+  --sq-wash: #B37B47;
+  --sq-wash-o: .9;
+  --sq-belly: #F2E4CC;
+  --sq-blush: #9E4B26;
+  --sq-blush-o: .22;
+  --sq-tex: #5C3A1E;
+  --sq-tex-o: .16;
+  --sq-nut: #E2B57E;
+  --sq-nut-cap: #7A4C28;
   --sq-scarf: var(--leaf);
   position: fixed; inset: 0; z-index: 70;
   overflow: hidden; contain: layout style paint;
@@ -297,63 +305,79 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   user-select: none; -webkit-user-select: none;
   color: var(--acorn);
 }
-/* In the dark theme it becomes chalk on toned paper: pale line, a warm brown
-   body, and the wash turns into shade so the belly and muzzle stay lighter. */
 :root[data-theme="dark"] .squirrel-stage {
-  --sq-paper: #3A2C21;
-  --sq-wash: #0D0805;
-  --sq-wash-opacity: .4;
+  --sq-ink: #1A120D;
+  --sq-paper: #F4ECE1;
+  --sq-wash: #BE8650;
+  --sq-wash-o: .92;
+  --sq-blush-o: .24;
 }
-:root[data-theme="dark"] .squirrel-art .sq-feature {
-  fill: #120D0A; stroke: var(--sq-ink); stroke-width: .7;
-}
-:root[data-theme="dark"] .squirrel-art .sq-glint { fill: var(--sq-ink); }
 .squirrel-stage * { pointer-events: none !important; }
+/* Only the squirrel itself and its hint slip take clicks; the rest of the
+   overlay lets every click through to the page. */
+.squirrel-stage > .squirrel-actor,
+.squirrel-stage > .sq-fortune-slip { pointer-events: auto !important; }
 .squirrel-actor {
   position: absolute; top: 0; left: 0;
   width: 88px; height: 71.5px;
+  display: block; margin: 0; padding: 0; border: 0; background: none;
+  font: inherit; color: inherit; cursor: pointer;
+  -webkit-appearance: none; appearance: none;
+  -webkit-tap-highlight-color: transparent;
   transform-origin: 50% 58%;
   will-change: transform;
 }
-.squirrel-facing { width: 100%; height: 100%; }
+.squirrel-actor:focus { outline: none; }
+.squirrel-actor:focus-visible { outline: 2px dashed var(--acorn); outline-offset: 2px; border-radius: 40%; }
+.squirrel-facing { display: block; width: 100%; height: 100%; }
 .squirrel-art { display: block; width: 100%; height: 100%; overflow: visible; }
 
 /* Drawing layers */
 .squirrel-art .sq-paper { fill: var(--sq-paper); }
-.squirrel-art .sq-wash { fill: var(--sq-wash); opacity: var(--sq-wash-opacity); }
-.squirrel-art .sq-scarf-wash { fill: var(--sq-scarf); opacity: .34; }
-.squirrel-art .sq-line, .squirrel-art .sq-fine, .squirrel-art .sq-hatch,
-.squirrel-art .sq-fur, .squirrel-art .sq-ghost, .squirrel-art .sq-whisker,
-.squirrel-art .sq-ground {
+.squirrel-art .sq-wash { fill: var(--sq-wash); opacity: var(--sq-wash-o); }
+.squirrel-art .sq-belly { fill: var(--sq-belly); }
+.squirrel-art .sq-blush { fill: var(--sq-blush); opacity: var(--sq-blush-o); }
+.squirrel-art .sq-shade { fill: var(--sq-ink); opacity: .2; }
+.squirrel-art .sq-scarf-wash { fill: var(--sq-scarf); opacity: .5; }
+.squirrel-art .sq-line, .squirrel-art .sq-fine, .squirrel-art .sq-mark,
+.squirrel-art .sq-hatch, .squirrel-art .sq-texture, .squirrel-art .sq-ghost,
+.squirrel-art .sq-whisker, .squirrel-art .sq-ground {
   fill: none; stroke: var(--sq-ink);
   stroke-linecap: round; stroke-linejoin: round;
 }
-.squirrel-art .sq-line { stroke-width: 1.3; }
-.squirrel-art .sq-broken { stroke-dasharray: 34 2.4 12 1.8 46 2.6 20 2; }
-.squirrel-art .sq-thin { stroke-width: 1.1; }
-.squirrel-art .sq-fine { stroke-width: .8; }
-.squirrel-art .sq-faint { opacity: .45; }
-.squirrel-art .sq-fur { stroke-width: .75; opacity: .7; }
-.squirrel-art .sq-hatch { stroke-width: .65; opacity: .42; }
-.squirrel-art .sq-hatch.sq-dense { opacity: .55; }
-.squirrel-art .sq-ghost { stroke-width: .7; opacity: .28; }
-.squirrel-art .sq-whisker { stroke-width: .5; opacity: .5; }
-.squirrel-art .sq-ground { stroke-width: .8; opacity: .3; }
+.squirrel-art .sq-line { stroke-width: 2.3; }
+.squirrel-art .sq-thin { stroke-width: 1.85; }
+.squirrel-art .sq-fine { stroke-width: 1.05; }
+.squirrel-art .sq-mark { stroke-width: 1.4; }
+.squirrel-art .sq-faint { opacity: .4; }
+.squirrel-art .sq-texture { stroke: var(--sq-tex); stroke-width: .55; opacity: var(--sq-tex-o); }
+.squirrel-art .sq-hatch { stroke-width: .6; opacity: .3; }
+.squirrel-art .sq-ghost { stroke-width: .8; opacity: .2; }
+.squirrel-art .sq-whisker { stroke-width: .5; opacity: .4; }
+.squirrel-art .sq-ground { stroke-width: .9; opacity: .25; }
 .squirrel-art .sq-ink-fill { fill: var(--sq-ink); }
-.squirrel-art .sq-glint { fill: var(--sq-paper); }
+.squirrel-art .sq-glint { fill: #FFFFFF; }
+.sq-nut-body { fill: var(--sq-nut); stroke: none; }
+.sq-nut-cap { fill: var(--sq-nut-cap); stroke: none; }
+.squirrel-art .sq-held-icon { color: var(--sq-ink); }
 
 /* Rig: pivots for each moving part */
-.sq-tail { transform-origin: 48px 77px; }
-.sq-head { transform-origin: 78px 51px; }
-.sq-hind-near, .sq-hind-far { transform-origin: 55px 80px; }
-.sq-front-near, .sq-front-far { transform-origin: 79px 76px; }
-.sq-arm { transform-origin: 78px 62px; }
-.sq-eye { transform-origin: 93px 42.6px; }
+.sq-tail { transform-origin: 48px 82px; }
+.sq-head { transform-origin: 80px 54px; }
+.sq-hind-near, .sq-hind-far { transform-origin: 57px 84px; }
+.sq-front-near, .sq-front-far { transform-origin: 81px 86px; }
+.sq-arm { transform-origin: 80px 64px; }
+.sq-eye { transform-origin: 96.2px 37.2px; }
 .sq-scarf-end { transform-origin: 77px 59px; }
 
-/* Poses */
-.sq-reach, .sq-carried-acorn, .sq-holding-paw,
+/* Poses. Four limbs at most: sitting, it shows its hind feet and a paw at its
+   chest; running free it drops onto all fours; carrying, it runs on its hind
+   legs with the acorn held in both paws. */
+.sq-reach, .sq-carried-acorn, .sq-holding-paw, .sq-front-near, .sq-front-far,
 .sq-scarf, .sq-exclaim, .sq-zzz, .sq-yawn { opacity: 0; }
+.squirrel-actor.is-running:not(.is-carrying) .sq-front-near,
+.squirrel-actor.is-running:not(.is-carrying) .sq-front-far { opacity: 1; }
+.squirrel-actor.is-running:not(.is-carrying) .sq-arm { opacity: 0; }
 .squirrel-actor.is-winter .sq-scarf { opacity: 1; }
 .squirrel-actor.is-carrying .sq-carried-acorn,
 .squirrel-actor.is-carrying .sq-holding-paw { opacity: 1; }
@@ -375,7 +399,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .squirrel-actor.is-sniffing .sq-eye { animation: squirrel-blink .75s ease-in-out; }
 
 /* Easter egg poses: startled, hurrying, tucked for a backflip, yawning */
-.squirrel-actor.is-startled .sq-exclaim { opacity: 1; animation: squirrel-pop .28s ease-out; transform-origin: 102px 2px; }
+.squirrel-actor.is-startled .sq-exclaim { opacity: 1; animation: squirrel-pop .28s ease-out; transform-origin: 103px 2px; }
 .squirrel-actor.is-startled .squirrel-art { animation: squirrel-jolt .3s ease-out; }
 .squirrel-actor.is-hurrying.is-running .sq-hind-near,
 .squirrel-actor.is-hurrying.is-running .sq-front-far { animation-duration: .14s; }
@@ -383,8 +407,6 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .squirrel-actor.is-hurrying.is-running .sq-hind-far { animation-duration: .14s; animation-delay: -.07s; }
 .squirrel-actor.is-tucked .sq-hind-near,
 .squirrel-actor.is-tucked .sq-hind-far { transform: rotate(-30deg); }
-.squirrel-actor.is-tucked .sq-front-near,
-.squirrel-actor.is-tucked .sq-front-far { transform: rotate(34deg); }
 .squirrel-actor.is-tucked .sq-tail { transform: rotate(16deg); }
 .squirrel-actor.is-tucked .sq-ground { opacity: 0; }
 .squirrel-actor.is-yawning .sq-head { transform: rotate(-7deg); }
@@ -392,6 +414,28 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .squirrel-actor.is-yawning .sq-mouth { opacity: 0; }
 .squirrel-actor.is-yawning .sq-yawn { opacity: 1; }
 .squirrel-actor.is-yawning .sq-zzz { opacity: 1; animation: squirrel-zzz .95s ease-out both; }
+
+/* Double-clicked: a backflip on the spot, mirrored with the squirrel. */
+.squirrel-actor.is-spinning .squirrel-art { animation: squirrel-spin .7s cubic-bezier(.35, 0, .3, 1); transform-origin: 50% 60%; }
+@keyframes squirrel-spin {
+  0% { transform: translateY(0) rotate(0); }
+  45% { transform: translateY(-26px) rotate(-200deg); }
+  100% { transform: translateY(0) rotate(-360deg); }
+}
+/* Hovered: it stops and looks up, the cue that it can be clicked. */
+.squirrel-actor.is-frozen * { animation-play-state: paused !important; }
+.squirrel-actor.is-noticing .sq-head { transform: rotate(-9deg); transition: transform .15s ease-out; }
+/* Presenting a hint: sitting up, both paws around the acorn. */
+.squirrel-actor.is-presenting .sq-holding-paw { opacity: 1; }
+.squirrel-actor.is-presenting .sq-arm,
+.squirrel-actor.is-presenting .sq-reach,
+.squirrel-actor.is-presenting .sq-carried-acorn,
+.squirrel-actor.is-presenting .sq-front-near,
+.squirrel-actor.is-presenting .sq-front-far { opacity: 0 !important; }
+.squirrel-actor.is-presenting .sq-hind-near,
+.squirrel-actor.is-presenting .sq-hind-far,
+.squirrel-actor.is-presenting .sq-tail { animation: none !important; transform: none; }
+.squirrel-actor.is-presenting .sq-head { animation: none !important; transform: rotate(-8deg); }
 
 @keyframes squirrel-stride {
   0%, 100% { transform: rotate(-23deg); }
@@ -430,6 +474,54 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 }
 .squirrel-transfer svg { width: 100%; height: 100%; display: block; overflow: visible; }
 
+/* The acorn fortune: the cap pops off and a paper slip unrolls with a hint. */
+.sq-fortune-nut {
+  position: absolute; width: 30px; height: 30px;
+  color: var(--sq-ink);
+  transform: scale(.4); opacity: 0;
+  transition: transform .18s ease-in, opacity .15s ease-in;
+}
+.sq-fortune-nut.is-open {
+  transform: scale(1); opacity: 1;
+  transition: transform .26s cubic-bezier(.3, 1.5, .5, 1), opacity .12s ease-out;
+}
+.sq-fortune-nut svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.sq-fortune-nut .nut-cap { transform-origin: 50% 40%; transition: transform .2s ease-in; }
+.sq-fortune-nut.is-open .nut-cap {
+  transform: translate(var(--cap-x, 10px), -13px) rotate(var(--cap-r, 42deg));
+  transition: transform .32s cubic-bezier(.3, 1.6, .5, 1) .16s;
+}
+.sq-fortune-slip {
+  position: absolute; left: 0; top: 0; box-sizing: border-box;
+  width: min(260px, calc(100vw - 24px));
+  padding: 12px 15px 10px;
+  background: var(--paper); color: var(--body);
+  border: 1px solid var(--line-strong); border-radius: 3px;
+  box-shadow: 0 12px 26px -18px var(--shadow);
+  font: 15px/1.45 var(--serif);
+  transform: rotate(-1.4deg);
+  clip-path: inset(100% 0 0 0);
+  transition: clip-path .22s ease-in;
+}
+.sq-fortune-slip[data-side="below"] { clip-path: inset(0 0 100% 0); transform: rotate(1.2deg); }
+.sq-fortune-slip.is-open {
+  clip-path: inset(0 0 0 0);
+  transition: clip-path .46s cubic-bezier(.2, .8, .2, 1) .34s;
+}
+.sq-fortune-text { margin: 0 0 7px; color: var(--ink); }
+.sq-fortune-count { margin: 0; font: 12px/1.3 var(--sans); color: var(--muted); }
+.sq-fortune-slip kbd {
+  display: inline-block; min-width: 1.4em; text-align: center;
+  font: 600 12px/1.5 var(--sans); color: var(--ink);
+  background: var(--husk); border: 1px solid var(--line-strong); border-bottom-width: 2px;
+  border-radius: 4px; padding: 0 5px; margin: 0 1px; vertical-align: 1px;
+}
+
+/* The acorn shower */
+.sq-falling { position: absolute; left: 0; top: 0; color: var(--sq-ink); will-change: transform; }
+.sq-falling svg { display: block; width: 100%; height: 100%; overflow: visible; transition: transform .22s ease-in, opacity .22s ease-in; }
+.sq-falling.is-gathered svg { transform: translateY(-10px) scale(.2); opacity: 0; }
+
 /* Easter egg: the heading, denoised. Masks are drawn as pencil hatching. */
 .sq-tok { transition: color .6s ease; }
 .sq-tok.is-masked {
@@ -442,13 +534,21 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 /* Easter egg: an oak that grows in the footer after enough round trips. */
 .oak {
   display: inline-block; width: 18px; height: 18px;
-  margin-right: 6px; vertical-align: -3px;
-  color: var(--muted);
+  margin: 0 6px 0 0; padding: 0; border: 0; background: none;
+  vertical-align: -3px; color: var(--muted); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
+.oak:focus-visible { outline: 2px solid var(--acorn); outline-offset: 2px; border-radius: 3px; }
 .oak svg { display: block; width: 100%; height: 100%; overflow: visible; transform-origin: 50% 90%; }
 .oak .oak-leaf { fill: var(--leaf); fill-opacity: .28; stroke: var(--leaf); }
 .oak .oak-ground { opacity: .5; }
 .oak.is-growing svg { animation: oak-grow 1.2s cubic-bezier(.2, .8, .25, 1) both; }
+.oak.is-wiggling svg { animation: oak-wiggle .5s ease-in-out; }
+@keyframes oak-wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-8deg); }
+  60% { transform: rotate(6deg); }
+}
 @keyframes oak-grow {
   0% { transform: scale(.15, 0); opacity: 0; }
   55% { transform: scale(1.04, 1.08) rotate(-3deg); opacity: 1; }
@@ -469,5 +569,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 @media (prefers-reduced-motion: reduce) {
   .acorn-toggle, .squirrel-stage * { transition: none !important; animation: none !important; }
   .acorn-toggle.just-returned .acorn-icon { animation: none; }
-  .sq-tok, .oak svg { transition: none !important; animation: none !important; }
+  .sq-tok, .oak svg, .sq-fortune-nut, .sq-fortune-nut .nut-cap, .sq-fortune-slip, .sq-falling svg {
+    transition: none !important; animation: none !important;
+  }
 }
