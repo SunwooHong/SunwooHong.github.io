@@ -8,13 +8,31 @@
 <meta name="author" content="Sunwoo Hong" />
 <meta name="description" content="News from Sunwoo Hong." />
 
+<!-- 링크 미리보기 카드 (카카오톡, Slack, X, LinkedIn 등). 이미지는 같은 폴더의 og-image.png -->
+<link rel="canonical" href="https://sunwoohong.github.io/news.html" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Sunwoo Hong" />
+<meta property="og:title" content="News — Sunwoo Hong" />
+<meta property="og:description" content="News from Sunwoo Hong." />
+<meta property="og:url" content="https://sunwoohong.github.io/news.html" />
+<meta property="og:image" content="https://sunwoohong.github.io/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Sunwoo Hong, M.S. student in Artificial Intelligence at KAIST, next to a sketch of a squirrel holding an acorn." />
+<meta property="og:locale" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="News — Sunwoo Hong" />
+<meta name="twitter:description" content="News from Sunwoo Hong." />
+<meta name="twitter:image" content="https://sunwoohong.github.io/og-image.png" />
+
 <link rel="icon" type="image/png" href="favicon.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="style.css" />
-<!-- 저장된 테마를 화면이 그려지기 전에 적용 (깜빡임 방지) -->
-<script>try{if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+<!-- 테마를 화면이 그려지기 전에 적용 (깜빡임 방지).
+     직접 고른 테마가 있으면 그것을, 없으면 기기의 라이트/다크 설정을 따릅니다. -->
+<script>(function(){var t=null;try{t=localStorage.getItem('theme');}catch(e){}if(t==='dark'||(t!=='light'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-theme','dark');})();</script>
 </head>
 <body>
 
@@ -71,6 +89,10 @@
         </li>
         <li>
           <time>Jul 2026</time>
+          <div><a href="index.html#logical-equivariance">Logical Equivariance</a> received an <strong>Excellence Selection</strong> at the GARL 2026 Challenge (National AI Research Lab, Korea).</div>
+        </li>
+        <li>
+          <time>Jul 2026</time>
           <div>Presented <a href="index.html#logical-equivariance">Logical Equivariance</a> at the ICML 2026 Workshop on Foundations of Deep Generative Models.</div>
         </li>
         <li>
@@ -82,8 +104,20 @@
           <div>Started as a visiting researcher at the University of Toronto and the Vector Institute, hosted by Prof. Rahul G. Krishnan.</div>
         </li>
         <li>
+          <time>Jan 2026</time>
+          <div>Began a research collaboration with the LG Electronics Toronto AI Lab, mentored by Dr. Ali Pesaranghader, which led to <a href="index.html#route-guided">Route-Guided CBF-QP Repair</a>.</div>
+        </li>
+        <li>
           <time>Sep 2025</time>
           <div><a href="index.html#klass">KLASS</a> was accepted to NeurIPS 2025 as a <strong>Spotlight</strong>.</div>
+        </li>
+        <li>
+          <time>Feb 2025</time>
+          <div>Joined the OSI Lab at KAIST AI, advised by Prof. Se-Young Yun.</div>
+        </li>
+        <li>
+          <time>Feb 2024</time>
+          <div>Received my B.S. in Electrical and Computer Engineering from Seoul National University, and joined Prof. Sungjin Ahn’s lab at KAIST to work on video world models.</div>
         </li>
       </ul>
     </div>
@@ -98,19 +132,27 @@
   </div>
 </footer>
 
-<!-- 테마 전환: 선택은 브라우저에 저장되어 다음 방문과 다른 페이지에도 유지됩니다 -->
+<!-- 테마 전환: 버튼으로 고른 테마는 브라우저에 저장되어 다음 방문과 다른 페이지에도 유지됩니다.
+     아직 고른 적이 없으면 기기 설정을 따르고, 기기 설정이 바뀌면 바로 따라 바뀝니다. -->
 <script>
 (function () {
   var root = document.documentElement, btn = document.getElementById('theme-toggle');
   if (!btn) return;
+  var system = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
   function isDark() { return root.getAttribute('data-theme') === 'dark'; }
+  function chosen() { try { return localStorage.getItem('theme'); } catch (e) { return null; } }
+  function apply(dark) { if (dark) root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme'); label(); }
   function label() { btn.setAttribute('aria-label', isDark() ? 'Switch to light theme' : 'Switch to dark theme'); }
   btn.addEventListener('click', function () {
     var next = isDark() ? 'light' : 'dark';
-    if (next === 'dark') root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme');
+    apply(next === 'dark');
     try { localStorage.setItem('theme', next); } catch (e) {}
-    label();
   });
+  if (system) {
+    var follow = function (event) { if (!chosen()) apply(event.matches); };
+    if (system.addEventListener) system.addEventListener('change', follow);
+    else if (system.addListener) system.addListener(follow);
+  }
   label();
 })();
 </script>

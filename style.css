@@ -161,6 +161,18 @@ h2 a { font-family: var(--sans); font-size: .9rem; font-weight: 400; letter-spac
 }
 .news time { color: var(--muted); font-size: .93rem; font-variant-numeric: tabular-nums; padding-top: 1px; }
 
+/* ================= AWARDS & SERVICE (index.html) ================= */
+.list-group {
+  font-family: var(--sans); font-size: .9rem; font-weight: 600;
+  color: var(--ink); letter-spacing: 0;
+  margin: 18px 0 2px;
+}
+.list-group:first-of-type { margin-top: 4px; }
+#awards .news time { white-space: nowrap; }
+@media (max-width: 700px) {
+  #awards .news li { grid-template-columns: 88px minmax(0, 1fr); }
+}
+
 /* ================= PUBLICATION CARDS (index.html) ================= */
 .pub-legend { font-size: .9rem; color: var(--muted); margin: -6px 0 16px; }
 .pub {
