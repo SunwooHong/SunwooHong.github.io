@@ -18,6 +18,7 @@
   const OAK_LIFETIME = 60 * 60 * 1000;               // a grown oak disappears an hour later
   const OAK_SEEN_KEY = 'sunwoo.squirrel.oak.v1';    // localStorage: last oak stage shown growing
   const FOUND_KEY = 'sunwoo.squirrel.found.v1';     // localStorage: easter eggs already found
+  const HINTS_KEY = 'sunwoo.squirrel.hints.v1';     // localStorage: hints already handed out
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   function readStore(kind, key) {
@@ -123,7 +124,15 @@
   </div>
   <div class="sq-fortune-slip" hidden>
     <p class="sq-fortune-text"></p>
-    <p class="sq-fortune-count"></p>
+    <div class="sq-fortune-foot">
+      <button type="button" class="sq-fortune-turn" data-step="-1" aria-label="Previous hint">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg>
+      </button>
+      <p class="sq-fortune-count"></p>
+      <button type="button" class="sq-fortune-turn" data-step="1" aria-label="Next hint">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5"/></svg>
+      </button>
+    </div>
   </div>`;
   document.body.appendChild(stage);
 
@@ -136,6 +145,7 @@
   const fortuneSlip = stage.querySelector('.sq-fortune-slip');
   const fortuneText = stage.querySelector('.sq-fortune-text');
   const fortuneCount = stage.querySelector('.sq-fortune-count');
+  const fortuneTurns = Array.from(stage.querySelectorAll('.sq-fortune-turn'));
   const flyingIcon = sourceIcon.cloneNode(true);
   flyingIcon.removeAttribute('class');
   transfer.appendChild(flyingIcon);
@@ -480,23 +490,87 @@
 
   /* ---------------- Clicking the squirrel: an acorn fortune ----------------
      The squirrel stops, holds out an acorn, the cap pops off and a paper slip
-     unrolls with a hint for an easter egg not yet found. */
+     unrolls with a hint it has not given before. Arrows on the slip (or the
+     arrow keys) turn back to every hint already handed out, so nothing is lost
+     once all of them have been found. */
   let fortuneOpen = false;
   let fortuneTimer = 0;
   let fortuneToken = 0;
+  let fortunePages = [];
+  let fortunePage = 0;
+  let fortuneAnchor = null;
   let hintCursor = 0;
+  const CHECK = '<svg class="sq-fortune-check" viewBox="0 0 16 16" role="img" aria-label="Found:">' +
+    '<path d="M3 8.6 6.4 12 13 4.4"/></svg>';
 
+  function hintSet() {
+    try { return new Set(JSON.parse(readStore('localStorage', HINTS_KEY) || '[]')); } catch (_) { return new Set(); }
+  }
+
+  // A hint never shown before comes first; after that, the ones still not found.
   function nextHint() {
     const found = foundSet();
-    for (let i = 0; i < EGGS.length; i += 1) {
-      const egg = EGGS[(hintCursor + i) % EGGS.length];
-      if (!found.has(egg.id)) {
-        hintCursor = (EGGS.indexOf(egg) + 1) % EGGS.length;
-        return egg;
+    const given = hintSet();
+    let egg = EGGS.find(function (item) { return !found.has(item.id) && !given.has(item.id); });
+    if (!egg) {
+      for (let i = 0; i < EGGS.length; i += 1) {
+        const item = EGGS[(hintCursor + i) % EGGS.length];
+        if (!found.has(item.id)) { egg = item; break; }
       }
     }
-    return null;
+    if (!egg) return null;
+    hintCursor = (EGGS.indexOf(egg) + 1) % EGGS.length;
+    given.add(egg.id);
+    writeStore('localStorage', HINTS_KEY, JSON.stringify(Array.from(given)));
+    return egg;
   }
+
+  // Every hint handed out or egg found, in order, then the closing note.
+  function buildPages() {
+    const found = foundSet();
+    const given = hintSet();
+    const pages = EGGS.filter(function (item) { return found.has(item.id) || given.has(item.id); })
+      .map(function (item) { return { egg: item }; });
+    if (EGGS.every(function (item) { return found.has(item.id); })) pages.push({ final: true });
+    return pages;
+  }
+
+  function layoutSlip() {
+    if (!fortuneAnchor) return;
+    const hand = fortuneAnchor;
+    const nutSize = 30;
+    const width = document.documentElement.clientWidth;
+    const slipWidth = fortuneSlip.offsetWidth;
+    const slipHeight = fortuneSlip.offsetHeight;
+    const above = hand.y - nutSize / 2 - 8 - slipHeight > 8;
+    fortuneSlip.dataset.side = above ? 'above' : 'below';
+    fortuneSlip.style.left = Math.max(10, Math.min(width - slipWidth - 10, hand.x - slipWidth / 2)).toFixed(1) + 'px';
+    fortuneSlip.style.top = (above ? hand.y - nutSize / 2 - 8 - slipHeight : hand.y + nutSize / 2 + 8).toFixed(1) + 'px';
+  }
+
+  function showPage(index) {
+    if (!fortunePages.length) return;
+    fortunePage = (index + fortunePages.length) % fortunePages.length;
+    const page = fortunePages[fortunePage];
+    const found = foundSet();
+    const foundCount = EGGS.filter(function (item) { return found.has(item.id); }).length;
+    fortuneText.innerHTML = page.final ? ALL_FOUND : (found.has(page.egg.id) ? CHECK : '') + page.egg.hint;
+    fortuneCount.textContent = 'Found ' + foundCount + ' of ' + EGGS.length;
+    fortuneTurns.forEach(function (turn) { turn.hidden = fortunePages.length < 2; });
+    layoutSlip();
+    status.textContent = fortuneText.textContent + ' ' + fortuneCount.textContent + '.';
+    clearTimeout(fortuneTimer);
+    fortuneTimer = setTimeout(function () { closeFortune(); }, 14000);
+  }
+
+  function turnPage(step) { if (fortuneOpen) showPage(fortunePage + step); }
+
+  fortuneTurns.forEach(function (turn) {
+    turn.addEventListener('click', function (event) {
+      event.stopPropagation();
+      turnPage(Number(turn.dataset.step));
+    });
+  });
 
   function onOutsidePress(event) {
     if (fortuneSlip.contains(event.target) || actor.contains(event.target)) return;
@@ -512,13 +586,11 @@
     actor.classList.remove('is-noticing');
     actor.classList.add('is-frozen', 'is-presenting');
     const egg = nextHint();
-    const found = foundSet();
-    const foundCount = EGGS.filter(function (item) { return found.has(item.id); }).length;
-    fortuneText.innerHTML = egg ? egg.hint : ALL_FOUND;
-    fortuneCount.textContent = egg ? 'Found ' + foundCount + ' of ' + EGGS.length : EGGS.length + ' of ' + EGGS.length;
+    fortunePages = buildPages();
     // The nut sits in the squirrel's paws; the slip unrolls from it.
     const hand = handPoint(102, 63);
     const nutSize = 30;
+    fortuneAnchor = hand;
     fortuneNut.style.left = (hand.x - nutSize / 2).toFixed(1) + 'px';
     fortuneNut.style.top = (hand.y - nutSize / 2).toFixed(1) + 'px';
     // The cap flies off away from the squirrel's face.
@@ -527,20 +599,11 @@
     fortuneSlip.style.visibility = 'hidden';
     fortuneSlip.hidden = false;
     fortuneNut.hidden = false;
-    const width = document.documentElement.clientWidth;
-    const slipWidth = fortuneSlip.offsetWidth;
-    const slipHeight = fortuneSlip.offsetHeight;
-    const above = hand.y - nutSize / 2 - 8 - slipHeight > 8;
-    fortuneSlip.dataset.side = above ? 'above' : 'below';
-    fortuneSlip.style.left = Math.max(10, Math.min(width - slipWidth - 10, hand.x - slipWidth / 2)).toFixed(1) + 'px';
-    fortuneSlip.style.top = (above ? hand.y - nutSize / 2 - 8 - slipHeight : hand.y + nutSize / 2 + 8).toFixed(1) + 'px';
+    showPage(egg ? fortunePages.findIndex(function (page) { return page.egg === egg; }) : fortunePages.length - 1);
     fortuneSlip.style.visibility = '';
     void fortuneSlip.offsetWidth;
     fortuneNut.classList.add('is-open');
     fortuneSlip.classList.add('is-open');
-    status.textContent = fortuneText.textContent + ' ' + fortuneCount.textContent + '.';
-    clearTimeout(fortuneTimer);
-    fortuneTimer = setTimeout(function () { closeFortune(); }, 14000);
     document.addEventListener('pointerdown', onOutsidePress, true);
   }
 
@@ -923,6 +986,11 @@
     if (event.key === 'Escape') {
       if (fortuneOpen) closeFortune();
       else if (busy) cancelVisit();
+      return;
+    }
+    if (fortuneOpen && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+      event.preventDefault();
+      turnPage(event.key === 'ArrowLeft' ? -1 : 1);
       return;
     }
     if (event.ctrlKey || event.metaKey || event.altKey || isEditable(event.target)) return;

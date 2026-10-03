@@ -215,6 +215,32 @@
 })();
 </script>
 
+<!-- 맨 위로: 왼쪽 위 아이콘이나 About을 눌러도 주소에 #top이 남지 않게 합니다.
+     다른 페이지에서 index.html#top으로 들어와도 주소를 깔끔하게 정리합니다. -->
+<script>
+(function () {
+  function cleanAddress() {
+    var path = location.pathname;
+    // 실제 사이트에서는 /index.html 대신 / 로 보여 줍니다 (로컬 파일에서는 그대로).
+    if (/^https?:$/.test(location.protocol)) path = path.replace(/index\.html$/, '');
+    try { history.replaceState(history.state, '', path + location.search); } catch (e) {}
+  }
+  function toTop(smooth) {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: smooth && !reduce ? 'smooth' : 'auto' });
+  }
+  document.addEventListener('click', function (event) {
+    var link = event.target.closest && event.target.closest('a[href="#top"]');
+    if (!link || event.defaultPrevented || event.button !== 0 ||
+        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    toTop(true);
+    if (location.hash) cleanAddress();
+  });
+  if (location.hash === '#top') { cleanAddress(); toTop(false); }
+})();
+</script>
+
 <!-- No external animation libraries or image assets required. -->
 <script src="acorn.js" defer></script>
 </body>

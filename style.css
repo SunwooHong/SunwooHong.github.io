@@ -320,7 +320,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 /* Only the squirrel itself and its hint slip take clicks; the rest of the
    overlay lets every click through to the page. */
 .squirrel-stage > .squirrel-actor,
-.squirrel-stage > .sq-fortune-slip { pointer-events: auto !important; }
+.squirrel-stage .sq-fortune-slip,
+.squirrel-stage .sq-fortune-slip * { pointer-events: auto !important; }
 .squirrel-actor {
   position: absolute; top: 0; left: 0;
   width: 88px; height: 71.5px;
@@ -333,6 +334,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 }
 .squirrel-actor:focus { outline: none; }
 .squirrel-actor:focus-visible { outline: 2px dashed var(--acorn); outline-offset: 2px; border-radius: 40%; }
+.squirrel-actor.is-presenting:focus-visible { outline: none; }
 .squirrel-facing { display: block; width: 100%; height: 100%; }
 .squirrel-art { display: block; width: 100%; height: 100%; overflow: visible; }
 
@@ -501,8 +503,23 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   clip-path: inset(0 0 0 0);
   transition: clip-path .46s cubic-bezier(.2, .8, .2, 1) .34s;
 }
-.sq-fortune-text { margin: 0 0 7px; color: var(--ink); }
-.sq-fortune-count { margin: 0; font: 12px/1.3 var(--sans); color: var(--muted); }
+.sq-fortune-text { margin: 0 0 4px; color: var(--ink); }
+.sq-fortune-check {
+  display: inline-block; width: 14px; height: 14px; margin: 0 5px 0 0; vertical-align: -1px;
+  fill: none; stroke: var(--leaf); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+.sq-fortune-foot { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin: 0 -9px -6px; }
+.sq-fortune-count { margin: 0 auto; font: 12px/1.3 var(--sans); color: var(--muted); }
+.sq-fortune-turn {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 32px; width: 32px; height: 32px; padding: 0; margin: 0;
+  border: 0; border-radius: 50%; background: none; color: var(--muted); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sq-fortune-turn[hidden] { display: inline-flex !important; visibility: hidden; }
+.sq-fortune-turn:hover { color: var(--cap); background: var(--husk); }
+.sq-fortune-turn:focus-visible { outline: 2px solid var(--acorn); outline-offset: 1px; }
+.sq-fortune-turn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .sq-fortune-slip kbd {
   display: inline-block; min-width: 1.4em; text-align: center;
   font: 600 12px/1.5 var(--sans); color: var(--ink);
