@@ -553,12 +553,14 @@
     fortunePage = (index + fortunePages.length) % fortunePages.length;
     const page = fortunePages[fortunePage];
     const found = foundSet();
-    const foundCount = EGGS.filter(function (item) { return found.has(item.id); }).length;
-    fortuneText.innerHTML = page.final ? ALL_FOUND : (found.has(page.egg.id) ? CHECK : '') + page.egg.hint;
-    fortuneCount.textContent = 'Found ' + foundCount + ' of ' + EGGS.length;
+    const isFound = !page.final && found.has(page.egg.id);
+    fortuneText.innerHTML = page.final ? ALL_FOUND : (isFound ? CHECK : '') + page.egg.hint;
+    // Each easter egg keeps its own number, so the count changes as you turn.
+    fortuneCount.textContent = page.final ? 'All ' + EGGS.length + ' found'
+      : 'Hint ' + (EGGS.indexOf(page.egg) + 1) + ' of ' + EGGS.length;
     fortuneTurns.forEach(function (turn) { turn.hidden = fortunePages.length < 2; });
     layoutSlip();
-    status.textContent = fortuneText.textContent + ' ' + fortuneCount.textContent + '.';
+    status.textContent = (isFound ? 'Found. ' : '') + fortuneText.textContent + ' ' + fortuneCount.textContent + '.';
     clearTimeout(fortuneTimer);
     fortuneTimer = setTimeout(function () { closeFortune(); }, 14000);
   }
