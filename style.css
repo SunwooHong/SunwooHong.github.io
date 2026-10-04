@@ -405,6 +405,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 /* Only the squirrel itself and its hint slip take clicks; the rest of the
    overlay lets every click through to the page. */
 .squirrel-stage > .squirrel-actor,
+.squirrel-stage .sq-bubble,
 .squirrel-stage .sq-fortune-slip,
 .squirrel-stage .sq-fortune-slip * { pointer-events: auto !important; }
 .squirrel-actor {
@@ -421,6 +422,35 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 .squirrel-actor:focus-visible { outline: 2px dashed var(--acorn); outline-offset: 2px; border-radius: 40%; }
 .squirrel-actor.is-presenting:focus-visible { outline: none; }
 .squirrel-facing { display: block; width: 100%; height: 100%; }
+/* "click me!": a comic speech bubble beside the squirrel's head. It sits on the side
+   the squirrel faces, so it never leaves the top of the screen, and is not mirrored. */
+.sq-bubble {
+  position: absolute; top: -2px; left: calc(100% - 6px);
+  padding: 4px 10px 5px; white-space: nowrap;
+  font-family: var(--serif); font-style: italic; font-weight: 600; font-size: 14px; line-height: 1.2;
+  color: var(--sq-ink); background: var(--sq-paper);
+  border: 1.6px solid var(--sq-ink); border-radius: 14px 14px 14px 4px;
+  box-shadow: 2px 2px 0 rgba(59, 43, 31, .18);
+  opacity: 0; visibility: hidden; transform: scale(.4) rotate(-8deg); transform-origin: 0 100%;
+  transition: opacity .16s ease, transform .22s cubic-bezier(.3, 1.6, .5, 1), visibility .16s;
+}
+/* the little tail pointing back at the squirrel */
+.sq-bubble::after {
+  content: ""; position: absolute; left: -6px; bottom: 3px; width: 9px; height: 9px;
+  background: var(--sq-paper);
+  border-left: 1.6px solid var(--sq-ink); border-bottom: 1.6px solid var(--sq-ink);
+  transform: skewX(-28deg) rotate(18deg); border-bottom-left-radius: 2px;
+}
+.squirrel-actor.faces-left .sq-bubble {
+  left: auto; right: calc(100% - 6px); border-radius: 14px 14px 4px 14px; transform-origin: 100% 100%;
+  transform: scale(.4) rotate(8deg);
+}
+.squirrel-actor.faces-left .sq-bubble::after {
+  left: auto; right: -6px; border-left: 0; border-right: 1.6px solid var(--sq-ink);
+  transform: skewX(28deg) rotate(-18deg); border-bottom-left-radius: 0; border-bottom-right-radius: 2px;
+}
+.squirrel-actor.is-calling .sq-bubble { opacity: 1; visibility: visible; transform: rotate(-4deg); }
+.squirrel-actor.is-calling.faces-left .sq-bubble { transform: rotate(4deg); }
 .squirrel-art { display: block; width: 100%; height: 100%; overflow: visible; }
 
 /* Drawing layers */

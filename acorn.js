@@ -114,6 +114,7 @@
       </g>
       </svg>
     </span>
+    <span class="sq-bubble" aria-hidden="true"></span>
   </button>
   <div class="squirrel-transfer" hidden aria-hidden="true"></div>
   <div class="sq-fortune-nut" hidden aria-hidden="true">
@@ -143,6 +144,7 @@
   const actor = stage.querySelector('.squirrel-actor');
   const facing = stage.querySelector('.squirrel-facing');
   const figure = stage.querySelector('.sq-figure');
+  const bubble = stage.querySelector('.sq-bubble');
   const transfer = stage.querySelector('.squirrel-transfer');
   const heldIcon = stage.querySelector('.sq-held-icon');
   const fortuneNut = stage.querySelector('.sq-fortune-nut');
@@ -157,7 +159,7 @@
   actor.classList.toggle('is-winter', isWinter);
 
   const TRANSIENT = ['is-running', 'is-reaching', 'is-sniffing', 'is-carrying', 'is-yawning',
-    'is-startled', 'is-hurrying', 'is-peeking', 'is-frozen', 'is-presenting', 'is-noticing'];
+    'is-startled', 'is-hurrying', 'is-peeking', 'is-frozen', 'is-presenting', 'is-noticing', 'is-calling'];
 
   /* ---------------- Easter eggs and the hints the squirrel hands out ---------------- */
   const EGGS = [
@@ -261,6 +263,7 @@
   function face(next) {
     direction = next < 0 ? -1 : 1;
     facing.style.transform = 'scaleX(' + direction + ')';
+    actor.classList.toggle('faces-left', direction < 0);
   }
 
   // Coordinates are relative to the viewport; position is the feet's center.
@@ -386,6 +389,25 @@
       markFound('mood');
       await holdClass('is-yawning', duration + 520, signal);
     } else await sniff(duration, signal);
+    if (first) await callOut(signal);
+  }
+
+  /* ---------------- "click me!": a speech bubble until the squirrel has been clicked once ----------------
+     Mid-errand the squirrel stops, looks out and says so in a comic bubble. The bubble
+     stays for the next stretch of the run, and never shows again once someone has
+     clicked the squirrel (remembered in localStorage). */
+  const CLICKED_KEY = 'sunwoo.squirrel.clicked.v1';
+  let callTimer = 0;
+  function everClicked() { return readStore('localStorage', CLICKED_KEY) === '1'; }
+  function hushCall() { clearTimeout(callTimer); actor.classList.remove('is-calling'); }
+  async function callOut(signal) {
+    if (everClicked() || motionPreference.matches) return;
+    const touch = window.matchMedia && window.matchMedia('(hover: none)').matches;
+    bubble.textContent = touch ? 'tap me!' : 'click me!';
+    actor.classList.add('is-calling');
+    clearTimeout(callTimer);
+    callTimer = setTimeout(hushCall, 3200);
+    await pause(1150, signal);
   }
 
   async function fullVisit(returning, g, signal) {
@@ -466,6 +488,7 @@
       stopBoil();
       clearTimeout(startleTimer);
       clearTimeout(noticeTimer);
+      clearTimeout(callTimer);
       stage.hidden = true;
       transfer.hidden = true;
       TRANSIENT.forEach(function (name) { actor.classList.remove(name); });
@@ -595,6 +618,8 @@
     fortuneToken += 1;
     frozen = true;
     clearTimeout(noticeTimer);
+    hushCall();
+    writeStore('localStorage', CLICKED_KEY, '1');
     actor.classList.remove('is-noticing');
     actor.classList.add('is-frozen', 'is-presenting');
     const egg = nextHint();
