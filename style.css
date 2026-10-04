@@ -157,6 +157,11 @@ h2 {
 }
 /* [full list] 링크 */
 h2 a { font-family: var(--sans); font-size: .9rem; font-weight: 400; letter-spacing: 0; white-space: nowrap; }
+.h2-note { font-family: var(--sans); font-size: .85rem; font-weight: 400; font-style: italic; letter-spacing: 0;
+           color: var(--muted); opacity: .7; text-align: right; }
+.h2-note[hidden] { display: none; }
+.h2-title { white-space: nowrap; }
+@media (max-width: 700px) { .h2-note { font-size: .78rem; } }
 
 /* ================= NEWS ================= */
 .news { margin: 0; padding: 0; list-style: none; }
