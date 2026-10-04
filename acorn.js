@@ -19,6 +19,9 @@
   const OAK_SEEN_KEY = 'sunwoo.squirrel.oak.v1';    // localStorage: last oak stage shown growing
   const FOUND_KEY = 'sunwoo.squirrel.found.v1';     // localStorage: easter eggs already found
   const HINTS_KEY = 'sunwoo.squirrel.hints.v1';     // localStorage: hints already handed out
+  const CLICKED_KEY = 'sunwoo.squirrel.clicked.v1'; // localStorage: the squirrel has been clicked
+  const PROGRESS_AT_KEY = 'sunwoo.squirrel.progress-at.v1'; // localStorage: last easter-egg activity
+  const PROGRESS_LIFETIME = 3 * 60 * 60 * 1000;      // found eggs, hints and "click me!" start over after 3 hours
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   function readStore(kind, key) {
@@ -27,6 +30,19 @@
   function writeStore(kind, key, value) {
     try { window[kind].setItem(key, value); } catch (_) {}
   }
+  function clearStore(kind, key) {
+    try { window[kind].removeItem(key); } catch (_) {}
+  }
+
+  // Easter-egg progress is forgotten three hours after the last activity, so a
+  // returning visitor gets the hints, the checkmarks and "click me!" afresh.
+  function touchProgress() { writeStore('localStorage', PROGRESS_AT_KEY, String(Date.now())); }
+  function expireProgress() {
+    const at = parseInt(readStore('localStorage', PROGRESS_AT_KEY) || '0', 10) || 0;
+    if (Date.now() - at <= PROGRESS_LIFETIME) return;
+    [FOUND_KEY, HINTS_KEY, CLICKED_KEY, PROGRESS_AT_KEY].forEach(function (key) { clearStore('localStorage', key); });
+  }
+  expireProgress();
 
   // Seasonal and late-night moods. ?squirrel=winter,night forces them for testing.
   const forced = (new URLSearchParams(window.location.search).get('squirrel') || '').split(',');
@@ -175,10 +191,12 @@
   const ALL_FOUND = 'All seven found. The only secret left is where I buried last year’s acorns.';
 
   function foundSet() {
+    expireProgress();
     try { return new Set(JSON.parse(readStore('localStorage', FOUND_KEY) || '[]')); } catch (_) { return new Set(); }
   }
   function markFound(id) {
     const found = foundSet();
+    touchProgress();
     if (found.has(id)) return;
     found.add(id);
     writeStore('localStorage', FOUND_KEY, JSON.stringify(Array.from(found)));
@@ -394,11 +412,10 @@
 
   /* ---------------- "click me!": a speech bubble until the squirrel has been clicked once ----------------
      Mid-errand the squirrel stops, looks out and says so in a comic bubble. The bubble
-     stays for the next stretch of the run, and never shows again once someone has
-     clicked the squirrel (remembered in localStorage). */
-  const CLICKED_KEY = 'sunwoo.squirrel.clicked.v1';
+     stays for the next stretch of the run, and stops showing once someone has clicked
+     the squirrel (remembered in localStorage, and forgotten again after three hours). */
   let callTimer = 0;
-  function everClicked() { return readStore('localStorage', CLICKED_KEY) === '1'; }
+  function everClicked() { expireProgress(); return readStore('localStorage', CLICKED_KEY) === '1'; }
   function hushCall() { clearTimeout(callTimer); actor.classList.remove('is-calling'); }
   async function callOut(signal) {
     if (everClicked() || motionPreference.matches) return;
@@ -535,6 +552,7 @@
     '<path d="M3 8.6 6.4 12 13 4.4"/></svg>';
 
   function hintSet() {
+    expireProgress();
     try { return new Set(JSON.parse(readStore('localStorage', HINTS_KEY) || '[]')); } catch (_) { return new Set(); }
   }
 
@@ -554,6 +572,7 @@
     hintCursor = (EGGS.indexOf(egg) + 1) % EGGS.length;
     given.add(egg.id);
     writeStore('localStorage', HINTS_KEY, JSON.stringify(Array.from(given)));
+    touchProgress();
     return egg;
   }
 
@@ -620,6 +639,7 @@
     clearTimeout(noticeTimer);
     hushCall();
     writeStore('localStorage', CLICKED_KEY, '1');
+    touchProgress();
     actor.classList.remove('is-noticing');
     actor.classList.add('is-frozen', 'is-presenting');
     const egg = nextHint();
