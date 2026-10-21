@@ -29,7 +29,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="style.css?v=20261022b" />
 <!-- 테마를 화면이 그려지기 전에 적용 (깜빡임 방지).
      직접 고른 테마가 있으면 그것을, 없으면 기기의 라이트/다크 설정을 따릅니다. -->
 <script>(function(){var t=null;try{t=localStorage.getItem('theme');}catch(e){}if(t==='dark'||(t!=='light'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-theme','dark');})();</script>
@@ -151,13 +151,12 @@
   <div class="wrap">
     <h2>Selected papers <a href="publications.html">[full list]</a></h2>
     <p class="pub-legend">* equal contribution, random order</p>
-    <!-- ↓ 논문 카드 하나 복사해서 개수를 늘리세요 -->
+    <!-- ↓ 논문 하나(article) 복사해서 개수를 늘리세요. 수상은 venue 뒤 <span class="tag"> -->
 
     <article class="pub" id="pivot-sd">
-      <span class="pub-badge award">Oral presentation</span>
       <h3 class="pub-title">Pivot-SD: Efficient Self-Distillation for Masked Diffusion Language Models</h3>
       <p class="pub-authors">Seo Hyun Kim*, <span class="me">Sunwoo Hong*</span>, Younwoo Choi, Chen-Hao Chao, Se-Young Yun, Rahul G. Krishnan</p>
-      <p class="pub-venue">EMNLP 2026, Main Conference (Oral)</p>
+      <p class="pub-venue">EMNLP 2026, Main Conference · <span class="tag">Oral presentation</span></p>
       <p class="pub-desc">A masked diffusion language model can be post-trained on under 4% of its tokens. Supervising only the few commitments that most reduce uncertainty beats full-sequence fine-tuning and online RL at a fraction of the compute.</p>
       <div class="pub-links">
         <a href="pivot-sd/">Project</a>
@@ -165,10 +164,9 @@
     </article>
 
     <article class="pub" id="klass">
-      <span class="pub-badge award">Spotlight, top 3.2%</span>
       <h3 class="pub-title">KLASS: KL-Guided Fast Inference in Masked Diffusion Models</h3>
       <p class="pub-authors">Seo Hyun Kim*, <span class="me">Sunwoo Hong*</span>, Hojung Jung, Youngrok Park, Se-Young Yun</p>
-      <p class="pub-venue">NeurIPS 2025 (Spotlight)</p>
+      <p class="pub-venue">NeurIPS 2025 · <span class="tag">Spotlight, top 3.2%</span></p>
       <p class="pub-desc">A training-free sampler that uses the KL divergence between denoising steps to find tokens that are safe to unmask in parallel. Up to 2.78× faster generation while improving over greedy decoding, across text, image, and molecular generation.</p>
       <div class="pub-links">
         <a href="https://arxiv.org/abs/2511.05664" target="_blank" rel="noopener">arXiv</a>
@@ -177,7 +175,6 @@
     </article>
 
     <article class="pub" id="logical-equivariance">
-      <span class="pub-badge">Under review</span>
       <h3 class="pub-title">Logical Equivariance in Diffusion Language Models</h3>
       <p class="pub-authors"><span class="me">Sunwoo Hong*</span>, Seo Hyun Kim*, Chen-Hao Chao, Younwoo Choi, Se-Young Yun, Rahul G. Krishnan</p>
       <p class="pub-venue">Under review. Earlier version at the ICML 2026 Workshop on Foundations of Deep Generative Models</p>
@@ -188,7 +185,6 @@
     </article>
 
     <article class="pub" id="route-guided">
-      <span class="pub-badge">Workshop</span>
       <h3 class="pub-title">Route-Guided CBF-QP Repair for Safe Vision-Language-Action Models</h3>
       <p class="pub-authors">Chan Park, <span class="me">Sunwoo Hong</span>, Kirak Kim, Yoonjeong Park, Alexander W. Olson, Ali Pesaranghader</p>
       <p class="pub-venue">RSS 2026 Workshop on Trustworthy Embodied Foundation Models</p>
@@ -200,11 +196,11 @@
       </div>
     </article>
 
-    <!-- 제출 후에는 배지를 "Under review"로 바꾸세요 -->
+    <!-- 제출 후에는 venue를 "Under review"로 바꾸세요 -->
     <article class="pub" id="outcome-distillation">
-      <span class="pub-badge">In preparation</span>
       <h3 class="pub-title">Reading Is Easy, Imagining Is Hard: Outcome Distillation for Robot Action Selection</h3>
       <p class="pub-authors"><span class="me">Sunwoo Hong</span></p>
+      <p class="pub-venue">In preparation</p>
       <p class="pub-desc">Recognizing whether a grasp worked from its recording is far easier than predicting it beforehand. A teacher that reads recorded outcomes from 16 labeled episodes trains a pre-action selector that comes within a point of label regression with all 158 labels, while futures imagined by a 2B-parameter video world model support selection only at chance.</p>
     </article>
   </div>
