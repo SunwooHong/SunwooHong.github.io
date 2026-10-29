@@ -6,14 +6,14 @@
 
 <title>Sunwoo Hong</title>
 <meta name="author" content="Sunwoo Hong" />
-<meta name="description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot: reasoning in language and in the physical world, and world models for embodied agents." />
+<meta name="description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot, most recently how robots judge and control their own actions." />
 
 <!-- 링크 미리보기 카드 (카카오톡, Slack, X, LinkedIn 등). 이미지는 같은 폴더의 og-image.png -->
 <link rel="canonical" href="https://sunwoohong.github.io/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Sunwoo Hong" />
 <meta property="og:title" content="Sunwoo Hong" />
-<meta property="og:description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot: reasoning in language and in the physical world, and world models for embodied agents." />
+<meta property="og:description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot, most recently how robots judge and control their own actions." />
 <meta property="og:url" content="https://sunwoohong.github.io/" />
 <meta property="og:image" content="https://sunwoohong.github.io/og-image.png" />
 <meta property="og:image:width" content="1200" />
@@ -22,7 +22,7 @@
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Sunwoo Hong" />
-<meta name="twitter:description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot: reasoning in language and in the physical world, and world models for embodied agents." />
+<meta name="twitter:description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot, most recently how robots judge and control their own actions." />
 <meta name="twitter:image" content="https://sunwoohong.github.io/og-image.png" />
 
 <link rel="icon" type="image/png" href="favicon.png" />
@@ -115,12 +115,16 @@
       Rotate a Sudoku board and a person sees the same puzzle; a language model that just solved it
       <a href="#logical-equivariance">often fails</a>. A person can tell at a glance whether an action
       worked; when a video world model imagines the outcome instead, a robot
-      <a href="#outcome-distillation">picks its action at chance</a>.
+      <a href="#r2v">picks its action at chance</a>. Pull an object from a person's hand and they
+      notice at once; a robot policy <a href="#neuraxis">carries on and opens an empty gripper</a>
+      over the basket.
     </p>
     <p>
       People reason instead of matching patterns, learn from very little, and act in a physical
-      world they understand. I work on bringing models closer to each: reasoning, efficient
-      learning, and world models for embodied agents.
+      world they understand. I work on bringing models closer to each. Right now that means robots
+      that judge their actions from what they record rather than what they imagine, and robot
+      control layered like a nervous system, where each layer handles what it can and passes up
+      only what it cannot.
     </p>
   </div>
 </header>
@@ -152,6 +156,21 @@
     <h2>Selected papers <a href="publications.html">[full list]</a></h2>
     <p class="pub-legend">* equal contribution, random order · † corresponding author</p>
     <!-- ↓ 논문 하나(article) 복사해서 개수를 늘리세요. 수상은 venue 뒤 <span class="tag"> -->
+
+    <article class="pub" id="r2v">
+      <h3 class="pub-title">Reading Is Easy, Imagining Is Hard: Closing the Foresight Gap with Practice</h3>
+      <p class="pub-authors"><span class="me">Sunwoo Hong</span>, Ali Pesaranghader†, Se-Young Yun†</p>
+      <p class="pub-venue">Under review</p>
+      <p class="pub-desc">Whether a grasp worked is easy to read from its recording and hard to predict beforehand, and the futures a 2B-parameter video world model imagines pick actions at chance. An action's success probability is the expected reading of its recording, so a reader fit on 16 labeled episodes can score every unlabeled attempt, and a verifier trained on those scores comes within a point of label regression with all 158 labels. Its gain grows with practice while the labels stay fixed.</p>
+    </article>
+
+    <!-- 공저자가 정해지면 "and collaborators"를 실제 이름으로 바꾸세요 -->
+    <article class="pub" id="neuraxis">
+      <h3 class="pub-title">Neuraxis: From Dual-System to Nervous-System Control in Vision-Language-Action Robots</h3>
+      <p class="pub-authors"><span class="me">Sunwoo Hong</span> and collaborators</p>
+      <p class="pub-venue">In preparation</p>
+      <p class="pub-desc">Dual-system VLAs pair a fast policy with a slow planner, but nothing reacts below the policy, nothing states what a subgoal should achieve, and the policy often ignores the goals it is given. Neuraxis adds what the vertebrate motor system has around those two levels: a spinal reflex layer and checkable subgoal contracts. It also shows why VLA executors ignore subgoals: when each scene comes with one instruction, behavior cloning can ignore language at no cost.</p>
+    </article>
 
     <article class="pub" id="pivot-sd">
       <h3 class="pub-title">Pivot-SD: Efficient Self-Distillation for Masked Diffusion Language Models</h3>
@@ -196,13 +215,6 @@
       </div>
     </article>
 
-    <!-- 제출 후에는 venue를 "Under review"로 바꾸세요 -->
-    <article class="pub" id="outcome-distillation">
-      <h3 class="pub-title">Reading Is Easy, Imagining Is Hard: Outcome Distillation for Robot Action Selection</h3>
-      <p class="pub-authors"><span class="me">Sunwoo Hong</span>, Ali Pesaranghader†, Se-Young Yun†</p>
-      <p class="pub-venue">In preparation</p>
-      <p class="pub-desc">Recognizing whether a grasp worked from its recording is far easier than predicting it beforehand. A teacher that reads recorded outcomes from 16 labeled episodes trains a pre-action selector that comes within a point of label regression with all 158 labels, while futures imagined by a 2B-parameter video world model support selection only at chance.</p>
-    </article>
   </div>
 </section>
 
@@ -333,7 +345,9 @@
         </g>
         <g class="gm-label" data-stone="world-models">
           <text class="gm-axis" x="505" y="286" text-anchor="middle">world models</text>
-          <a href="#outcome-distillation" data-card="outcome-distillation"><text class="gm-paper" x="505" y="304" text-anchor="middle">outcome distillation</text></a>
+          <a href="#r2v" data-card="r2v"><text class="gm-paper" x="499" y="304" text-anchor="end">R2V</text></a>
+          <text class="gm-paper gm-sep" x="505" y="304" text-anchor="middle">·</text>
+          <a href="#neuraxis" data-card="neuraxis"><text class="gm-paper" x="511" y="304">Neuraxis</text></a>
         </g>
       </svg>
       <!-- 돌에 마우스를 올리면(또는 누르면) 안내 문구 자리에 그 돌의 질문이 나타납니다 -->
@@ -355,8 +369,9 @@
         <p class="gs-q">Does a robot need to imagine the future to choose well?</p>
         <p class="gs-a">World models try to picture each action's outcome before acting, but picturing an
           outcome is far harder than recognizing one. Robots already record how their actions turned out,
-          and learning from those outcomes may matter more than generating new ones.</p>
-        <p class="gs-tags">In progress: <a href="#outcome-distillation">Outcome distillation</a></p>
+          and can check each step against what it should achieve. Learning from those recordings, and
+          thinking harder only when a check fails, may matter more than generating new futures.</p>
+        <p class="gs-tags">In progress: <a href="#r2v">R2V</a> · <a href="#neuraxis">Neuraxis</a></p>
       </div>
       </div>
     </figure>
