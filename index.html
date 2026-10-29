@@ -112,19 +112,20 @@
       cannot</strong>.
     </p>
     <p>
-      Rotate a Sudoku board and a person sees the same puzzle; a language model that just solved it
-      <a href="#logical-equivariance">often fails</a>. A person can tell at a glance whether an action
-      worked; when a video world model imagines the outcome instead, a robot
-      <a href="#r2v">picks its action at chance</a>. Pull an object from a person's hand and they
-      notice at once; a robot policy <a href="#neuraxis">carries on and opens an empty gripper</a>
-      over the basket.
+      People reason instead of matching patterns, learn from very little, and act in a physical
+      world they understand. Models still fall short on all three.
     </p>
     <p>
-      People reason instead of matching patterns, learn from very little, and act in a physical
-      world they understand. I work on bringing models closer to each. Right now that means robots
-      that judge their actions from what they record rather than what they imagine, and robot
-      control layered like a nervous system, where each layer handles what it can and passes up
-      only what it cannot.
+      Turn a Sudoku board on its side and a person still sees the same puzzle; a language model
+      that just solved it <a href="#logical-equivariance">often fails</a>. Tell a person a few times
+      whether a grasp worked, and they judge the next ones alone and improve with practice; a robot
+      is usually <a href="#r2v">given a label for every attempt</a>. When a cup slips from a person's
+      hand, they notice at once and react without rethinking the whole plan; a robot policy
+      <a href="#neuraxis">carries on and opens an empty gripper</a> over the basket.
+    </p>
+    <p>
+      I work on these gaps one at a time, by finding the assumption that holds a model class back
+      and replacing it.
     </p>
   </div>
 </header>
@@ -365,11 +366,11 @@
         <p class="gs-tags">So far: <a href="#pivot-sd">Pivot-SD</a> · <a href="#klass">KLASS</a></p>
       </div>
       <div class="gap-note" data-stone="world-models">
-        <p class="gs-q">Does a robot need to imagine the future to choose well?</p>
-        <p class="gs-a">World models try to picture each action's outcome before acting, but picturing an
-          outcome is far harder than recognizing one. Robots already record how their actions turned out,
-          and can check each step against what it should achieve. Learning from those recordings, and
-          thinking harder only when a check fails, may matter more than generating new futures.</p>
+        <p class="gs-q">What does a robot need to understand to act well?</p>
+        <p class="gs-a">Not every frame of the future. A person sees at once whether an action worked,
+          notices the moment something slips, and stops to rethink only when the plan breaks. A robot
+          can learn the same: judge outcomes from what it records, and check each step against what it
+          should achieve.</p>
         <p class="gs-tags">In progress: <a href="#r2v">R2V</a> · <a href="#neuraxis">Neuraxis</a></p>
       </div>
       </div>
