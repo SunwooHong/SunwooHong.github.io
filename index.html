@@ -6,14 +6,14 @@
 
 <title>Sunwoo Hong</title>
 <meta name="author" content="Sunwoo Hong" />
-<meta name="description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot, most recently how robots judge and control their own actions." />
+<meta name="description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot." />
 
 <!-- 링크 미리보기 카드 (카카오톡, Slack, X, LinkedIn 등). 이미지는 같은 폴더의 og-image.png -->
 <link rel="canonical" href="https://sunwoohong.github.io/" />
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Sunwoo Hong" />
 <meta property="og:title" content="Sunwoo Hong" />
-<meta property="og:description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot, most recently how robots judge and control their own actions." />
+<meta property="og:description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot." />
 <meta property="og:url" content="https://sunwoohong.github.io/" />
 <meta property="og:image" content="https://sunwoohong.github.io/og-image.png" />
 <meta property="og:image:width" content="1200" />
@@ -22,7 +22,7 @@
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Sunwoo Hong" />
-<meta name="twitter:description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot, most recently how robots judge and control their own actions." />
+<meta name="twitter:description" content="M.S. student at KAIST AI. I work on what people do easily and models still cannot." />
 <meta name="twitter:image" content="https://sunwoohong.github.io/og-image.png" />
 
 <link rel="icon" type="image/png" href="favicon.png" />
@@ -125,7 +125,9 @@
     </p>
     <p>
       I work on these gaps one at a time, by finding the assumption that holds a model class back
-      and replacing it.
+      and replacing it. In the long run, I want models that keep working when the world changes
+      around them and keep getting better from their own experience. That will take new algorithms
+      and architectures, and I want to build them.
     </p>
   </div>
 </header>
@@ -191,7 +193,7 @@
 
     <article class="pub" id="r2v">
       <h3 class="pub-title">World Models Need Judgment</h3>
-      <p class="pub-authors"><span class="me">Sunwoo Hong</span>, Ali Pesaranghader†, Se-Young Yun†</p>
+      <p class="pub-authors"><span class="me">Sunwoo Hong</span>, Se-Young Yun†</p>
       <p class="pub-venue">In preparation</p>
       <p class="pub-desc">World models predict what an action does but are not trained to judge whether it worked, and a 2B video world model's futures pick the best push at chance. A robot can learn that judgment from its own practice: with 16 labeled episodes, it does almost as well as with 158.</p>
     </article>
@@ -366,12 +368,11 @@
         <p class="gs-tags">So far: <a href="#pivot-sd">Pivot-SD</a> · <a href="#klass">KLASS</a></p>
       </div>
       <div class="gap-note" data-stone="world-models">
-        <p class="gs-q">What does a robot need to understand to act well?</p>
-        <p class="gs-a">Not every frame of the future. A person sees at once whether an action worked,
-          keeps track of what is already done, and stops to rethink only when the plan breaks. A robot
-          can learn the same: judge its actions from its own practice, and check each step against what
-          it should achieve.</p>
-        <p class="gs-tags">In progress: <a href="#r2v">R2V</a> · <a href="#neuraxis">Neuraxis</a></p>
+        <p class="gs-q">What does it take to understand the physical world?</p>
+        <p class="gs-a">More than predicting the next frame. A person knows where things are when they
+          are out of sight, sees at once whether an action worked, and gets better with every attempt.
+          A model that understands the world should do the same, and show it in what it can do.</p>
+        <p class="gs-tags">So far: <a href="#r2v">R2V</a> · <a href="#neuraxis">Neuraxis</a></p>
       </div>
       </div>
     </figure>
